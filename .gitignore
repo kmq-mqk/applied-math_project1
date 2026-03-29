@@ -1,0 +1,6 @@
+# build, cache, etc.
+__pycache__/
+*.pyc
+
+# testing
+*test*
