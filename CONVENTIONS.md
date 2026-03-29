@@ -14,3 +14,5 @@ Class | Title_Case | `class Matrix`, `class SVD_Decomposition`
 Class members | lower_case | `matrix.shape`, `matrix.num_cols`
 Functions | lower_case | `example_func()`
 Functions params | lower_case | `n_row`, `n_col`
+Source code file name | lower_case.<ext> | `part1_skeleton.py`
+Information file name | ALL_CAPS.md | `CONVENTIONS.md`
