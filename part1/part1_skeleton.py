@@ -1,6 +1,9 @@
 import determinant
 import gauss
 
+def is_zero(x: float) -> bool:
+	return abs(x) < 1e-10
+
 class Matrix:
 	def __str__(self):
 		return "\n".join(map(str, self.data))
@@ -103,3 +106,7 @@ class Matrix:
 		# return (rank, ([basis of C(self)], [basis of R(self)], [basis of N(self)]))
 		pass
 	""" END : CALCULATE ON MATRIX """
+
+""" ASSIGN CLASS METHODS TO FUNCTIONS FROM `inverse.py` """
+
+""" ASSIGN CLASS METHODS TO FUNCTIONS FROM `rank_basis.py` """
