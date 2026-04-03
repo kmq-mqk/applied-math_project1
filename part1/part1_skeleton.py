@@ -32,12 +32,33 @@ class Matrix:
 
 	""" START ATTRIBUTE CHECKING """
 	def is_ref(self):
-		# return True `self` is REF
-		pass
+		# return True if `self` is REF
+		pivot_col = -1
+		mat = self.data
+		for row in mat:
+			for j in range(self.num_col):
+				if row[j]:
+					if j <= pivot_col:
+						return False;
+					pivot_col = j
+					continue
+		return True
+
 	def is_diagonal(self):
-		pass
+		mat = self.data
+		for i in range(self.num_row):
+			for j in range(self.num_col):
+				if i != j and mat[i][j]:
+					return False
+		return True
+			
 	def is_identity(self):
-		pass
+		mat = self.data
+		for i in range(self.num_row):
+			for j in range(self.num_col):
+				if (i != j and mat[i][j]) or (i == j and mat[i][j] != 1):
+					return False
+		return True
 	""" END ATTRIBUTE CHECKING """
 
 	""" START : GENERATE NEW MATRIX """
