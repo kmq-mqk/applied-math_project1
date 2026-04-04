@@ -1,6 +1,6 @@
 def gaussian_eliminate(A, b = None):
 	if b is None:
-	b = [0]*len(A)
+		b = [0]*len(A)
 
 	n = len(A) # Take the number of A's rows
 	count = 0
@@ -54,12 +54,19 @@ def verify_solution(A, x, b):
 
 
 # Test
+#A = [
+#	[3, 2, -4], 
+#	[2, 3, 3], 
+#	[5, -3, 1]
+#]
+#b = [3, 15, 14]
+
 A = [
-	[3, 2, -4], 
-	[2, 3, 3], 
-	[5, -3, 1]
+	[0, 1, 2],
+	[0, 3, 4],
+	[3, 5, 7]
 ]
-b = [3, 15, 14]
+b = [0, 0, 0]
 
 result = gaussian_eliminate(A, b)
 A_bar, x, count = result

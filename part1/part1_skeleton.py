@@ -1,16 +1,10 @@
-import determinant
-import gauss
+from . import determinant
+from . import gauss
 
 class Matrix:
-	def __str__(self):
-		return "\n".join(map(str, self.data))
-
-	def shape(self):
-		return (self.rows, self.cols)
-
 	""" START CONSTRUCTORS """
 	def __init__(self, data: list[list[float]]):
-		self.data = data
+		self.data = [row[:] for row in data]
 		self.num_row = len(data)
 		self.num_col = len(data[0])
 
@@ -29,6 +23,15 @@ class Matrix:
 			for i in range(n)
 		])
 	""" END CONSTRUCTORS """
+
+	def __str__(self):
+		return "\n".join(
+			"[ " + " ".join(f"{x:.2f}" for x in row) + " ]"
+			for row in self.data
+		)
+
+	def shape(self):
+		return (self.rows, self.cols)
 
 	""" START ATTRIBUTE CHECKING """
 	def is_ref(self):
@@ -67,12 +70,12 @@ class Matrix:
 		return augmented matrix [self | other]
 		if other == None then let other = Identity matrix
 		"""
+		if other == None:
+			other = Matrix.identity(n)
 		if self.num_row != other.num_row:
 			raise ValueError("Matrices must have the same number of rows")
 
 		n = self.num_row
-		if other == None:
-			other = Matrix.identity(n)
 
 		new_data = [self.data[i] + other.data[i] for i in range(n)]
 		return Matrix(new_data)
@@ -87,7 +90,8 @@ class Matrix:
 	
 	def gauss_jordan_eliminate(self):
 		# return RREF matrix of self
-		pass
+		from .inverse import gauss_jordan_eliminate as gj
+		return gj(self)
 	""" END : GENERATE NEW MATRIX """
 
 	""" START : CALCULATE ON MATRIX """
@@ -105,5 +109,5 @@ class Matrix:
 	""" END : CALCULATE ON MATRIX """
 
 """ ASSIGN CLASS METHODS TO FUNCTIONS FROM `inverse.py` """
-
+#Matrix.gauss_jordan_eliminate = inverse.gauss_jordan_eliminate
 """ ASSIGN CLASS METHODS TO FUNCTIONS FROM `rank_basis.py` """

@@ -1,29 +1,51 @@
-def gauss_jordan_eliminate(mat: Matrix):
+from utils import utils
+from .part1_skeleton import Matrix
+
+def gauss_jordan_eliminate(A) -> Matrix:
 	"""
 	Khu Gauss-Jordan co chon phan tu chot (Partial Pivoting)
 	"""
-	m = mat.num_row
-	n = mat.num_col
+	ret = Matrix(A.data)
+	mat = ret.data
+	m = ret.num_row
+	n = ret.num_col
 
-	# buoc khu $k \in [0, m)$
-	for k in range(m):
+	target_row = 0
+	# buoc khu $k \in [0, n)$
+	for k in range(n):
+		if target_row >= m:
+			break
+
 		# Find desired `p` (max row)
-		p = 0
-		# iterrate `i`: `k <= i < n` to find max row
-		for i in range(k, m):
+		p = target_row
+		# iterrate `i`: `target_row <= i < m` to find max row
+		for i in range(target_row, m):
 			if abs(mat[p][k]) < abs(mat[i][k]):
 				p = i	# update max row
 		# swap `r_k` <-> `r_p`
-		mat[k], mat[p] = mat[p], mat[k]
+		mat[target_row], mat[p] = mat[p], mat[target_row]
 
 		# `mat[k][k] == 0` ->> skip column `k`
-		if is_zero(mat[k][k]):
+		if utils.is_zero(mat[target_row][k]):	# 100% will bug later
 			continue
 		
-		# if `pivot != 1` (`mat[k][k]` is `pivot`) then divide the current row by `pivot`, the `pivot`'s value after will be 1
-		pivot = mat[k][k]
-		if pivot != 1:	
-			row_multiply(mat[k], 1/pivot)
+		# if `pivot != 1` (`mat[target_row][k]` is `pivot`) then divide the current row by `pivot`, the `pivot`'s value after will be 1
+		pivot = mat[target_row][k]
+		if not utils.is_zero(pivot -1):	
+			utils.row_multiply(mat[target_row], 1/pivot)
 
-		# eliminate values in `pivot`'s column for rows below
+		# eliminate values in `pivot`'s column for all rows
+		for l in range(m):
+			if l == target_row:	# don't have to eliminate row of pivot
+				continue
+			factor = mat[l][k]/mat[target_row][k]
+			utils.row_add(mat[l], -factor, mat[target_row])
+		target_row += 1
+	return ret
 		
+def inverse(mat):
+	"""
+	Tra ve ma tran nghich dao cua `mat`
+	Su dung phuong phap khu Gauss-Jordan
+	"""
+	pass

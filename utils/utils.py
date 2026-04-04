@@ -6,11 +6,19 @@ def row_multiply(row: list, k):
 	"""
 	row <- row * k
 	"""
-	pass
+	n = len(row)
+	for i in range(n):
+		row[i] *= k
+	return
 
 def row_add(row: list, k, another: list):
 	"""
 	row <- row + (k * another)
 	"""
-	pass
+	if len(row) != len(another):
+		raise ValueError("Both rows must have the same length")
+
+	n = len(row)
+	for i in range(n):
+		row[i] += k*another[i]
 """ END   : ELEMENTARY ROW OPERATIONS """
