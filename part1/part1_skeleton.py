@@ -106,6 +106,19 @@ class Matrix:
 	def rank_and_basis(sefl):
 		# return (rank, ([basis of C(self)], [basis of R(self)], [basis of N(self)]))
 		pass
+
+	def transpose(self):
+		# return self^T
+		new_data = [[self.data[i][j] for i in range(self.num_row)] for j in range(self.num_col)]
+		return Matrix(new_data)
+	
+	def matmul(self, other):
+		# return self * other
+		if self.num_col != other.num_row:
+			raise ValueError("Number of columns of the first matrix must equal the number of rows of the second matrix")
+
+		new_data = [[sum(self.data[i][k] * other.data[k][j] for k in range(self.num_col)) for j in range(other.num_col)] for i in range(self.num_row)]
+		return Matrix(new_data)
 	""" END : CALCULATE ON MATRIX """
 
 """ ASSIGN CLASS METHODS TO FUNCTIONS FROM `inverse.py` """
