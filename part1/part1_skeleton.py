@@ -119,7 +119,7 @@ class Matrix:
 	def back_subtitution(self):
 		# return solution of [REF matrix | b']
 		if self.is_ref():
-			return gauss.back_subtitution(self.data, self.num_row)
+			return Vector(gauss.back_subtitution(self.data, self.num_row))
 
 	def rank_and_basis(self):
 		# return (rank, ([basis of C(self)], [basis of R(self)], [basis of N(self)]))
@@ -127,21 +127,24 @@ class Matrix:
 		return rb(self)
 	""" END : CALCULATE ON MATRIX """
 
-""" ASSIGN CLASS METHODS TO FUNCTIONS FROM `inverse.py` """
-""" ASSIGN CLASS METHODS TO FUNCTIONS FROM `rank_basis.py` """
-
 class Vector:
 	def __init__(self, components, is_column=True):
 		self.data = list(components)
 		self.num_row = self.num_col = 1
 		if is_column == True:
-			self.num_col = len(self.data)
-		else:
 			self.num_row = len(self.data)
+		else:
+			self.num_col = len(self.data)
 
 	def transpose(self):
-		return Vector(self.components, is_column=not self.is_column)
+		return Vector(self.data, is_column=not self.is_column)
 
 	def __repr__(self):
-		direction = "Column" if self.is_column else "Row"
-		return f"{direction} Vector: {self.components}"
+		direction = "^T" if self.num_col < self.num_row else ""
+		s = ", ".join(f"{x:.2f}" for x in self.data)
+		return f"({s}){direction}"
+	
+	def __str__(self):
+		direction = "^T" if self.num_col < self.num_row else ""
+		s = ", ".join(f"{x:.2f}" for x in self.data)
+		return f"({s}){direction}"

@@ -67,11 +67,3 @@ A_bar, x, count = result
 print("NGHIỆM CỦA HỆ PHƯƠNG TRÌNH:", x)
 if (verify_solution(A, x, b)):
 	print("PHƯƠNG PHÁP TÍNH ĐÚNG")
-
-
-
-
-
-    
-
-
