@@ -54,3 +54,6 @@ def inverse(mat):
 	aug_mat = mat.augment()
 	aug_mat = aug_mat.gauss_jordan_eliminate()
 	return aug_mat.take_cols(mat.num_col, mat.num_col*2 - 1)
+
+
+
