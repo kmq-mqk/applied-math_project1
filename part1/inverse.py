@@ -48,4 +48,9 @@ def inverse(mat):
 	Tra ve ma tran nghich dao cua `mat`
 	Su dung phuong phap khu Gauss-Jordan
 	"""
-	pass
+	if mat.det() == 0:
+		return None
+	
+	aug_mat = mat.augment()
+	aug_mat = aug_mat.gauss_jordan_eliminate()
+	return aug_mat.take_cols(mat.num_col, mat.num_col*2 - 1)

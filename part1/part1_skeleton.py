@@ -70,19 +70,32 @@ class Matrix:
 		return augmented matrix [self | other]
 		if other == None then let other = Identity matrix
 		"""
-		if other == None:
-			other = Matrix.identity(n)
-		if self.num_row != other.num_row:
+		if other != None and self.num_row != other.num_row:
 			raise ValueError("Matrices must have the same number of rows")
 
 		n = self.num_row
+		if other == None:
+			other = Matrix.identity(n)
 
 		new_data = [self.data[i] + other.data[i] for i in range(n)]
 		return Matrix(new_data)
 
+	def take_cols(self, *args):
+		# case 1: list of targeted cols
+		if len(args) == 1 and isistance(args[0], list):
+			selected_cols = args[0]
+		# case 2: <<first_col_id>>, <<last_col_id>> -> identify range [<<first_col_id>>, <<last_col_id>>]
+		elif len(args) == 2:
+			start_col, end_col = args
+			selected_cols = list(range(start_col, end_col + 1))
+		
+		selected_cols.sort()
+		return Matrix([[row[j] for j in selected_cols] for row in self.data])
+
 	def inverse(self):
 		# return self^{-1}
-		pass
+		from .inverse import inverse
+		return inverse(self)
 
 	def gaussian_eliminate(self):
 		# return (REF matrix of self, solution, number of steps)
@@ -96,7 +109,12 @@ class Matrix:
 
 	""" START : CALCULATE ON MATRIX """
 	def det(self):
-		return determinant.determinant(self)
+		if self.num_col != self.num_row:
+			raise ValueError(
+				f"Determinant undefined for non-square matrix: "
+				f"Shape of matrix: {self.shape}"
+				)
+		return determinant.determinant(self.data)
 
 	def back_subtitution(self):
 		# return solution of [REF matrix | b']
@@ -109,5 +127,4 @@ class Matrix:
 	""" END : CALCULATE ON MATRIX """
 
 """ ASSIGN CLASS METHODS TO FUNCTIONS FROM `inverse.py` """
-#Matrix.gauss_jordan_eliminate = inverse.gauss_jordan_eliminate
 """ ASSIGN CLASS METHODS TO FUNCTIONS FROM `rank_basis.py` """
