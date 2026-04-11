@@ -121,10 +121,27 @@ class Matrix:
 		if self.is_ref():
 			return gauss.back_subtitution(self.data, self.num_row)
 
-	def rank_and_basis(sefl):
+	def rank_and_basis(self):
 		# return (rank, ([basis of C(self)], [basis of R(self)], [basis of N(self)]))
-		pass
+		from .rank_basis import rank_and_basis as rb
+		return rb(self)
 	""" END : CALCULATE ON MATRIX """
 
 """ ASSIGN CLASS METHODS TO FUNCTIONS FROM `inverse.py` """
 """ ASSIGN CLASS METHODS TO FUNCTIONS FROM `rank_basis.py` """
+
+class Vector:
+	def __init__(self, components, is_column=True):
+		self.data = list(components)
+		self.num_row = self.num_col = 1
+		if is_column == True:
+			self.num_col = len(self.data)
+		else:
+			self.num_row = len(self.data)
+
+	def transpose(self):
+		return Vector(self.components, is_column=not self.is_column)
+
+	def __repr__(self):
+		direction = "Column" if self.is_column else "Row"
+		return f"{direction} Vector: {self.components}"

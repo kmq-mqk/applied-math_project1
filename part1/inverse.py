@@ -31,7 +31,7 @@ def gauss_jordan_eliminate(A) -> Matrix:
 		
 		# if `pivot != 1` (`mat[target_row][k]` is `pivot`) then divide the current row by `pivot`, the `pivot`'s value after will be 1
 		pivot = mat[target_row][k]
-		if not utils.is_zero(pivot -1):	
+		if not utils.is_zero(pivot - 1):	
 			utils.row_multiply(mat[target_row], 1/pivot)
 
 		# eliminate values in `pivot`'s column for all rows
