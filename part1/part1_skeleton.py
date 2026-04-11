@@ -36,13 +36,17 @@ class Matrix:
 	""" START ATTRIBUTE CHECKING """
 	def is_ref(self):
 		# return True if `self` is REF
+		""" 
+		a matrix is not ref
+		if later pivot column index < max column index of all previous pivot column
+		"""
 		pivot_col = -1
 		mat = self.data
 		for row in mat:
 			for j in range(self.num_col):
 				if row[j]:
 					if j <= pivot_col:
-						return False;
+						return False
 					pivot_col = j
 					continue
 		return True
