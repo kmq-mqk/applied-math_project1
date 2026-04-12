@@ -10,7 +10,7 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 from part1.part1_skeleton import Matrix, Vector
-import diagonalization
+import part2.diagonalization
 
 
 def svd(self):
