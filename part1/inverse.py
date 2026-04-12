@@ -31,7 +31,7 @@ def gauss_jordan_eliminate(A) -> Matrix:
 		
 		# if `pivot != 1` (`mat[target_row][k]` is `pivot`) then divide the current row by `pivot`, the `pivot`'s value after will be 1
 		pivot = mat[target_row][k]
-		if not utils.is_zero(pivot -1):	
+		if not utils.is_zero(pivot - 1):	
 			utils.row_multiply(mat[target_row], 1/pivot)
 
 		# eliminate values in `pivot`'s column for all rows
@@ -48,4 +48,12 @@ def inverse(mat):
 	Tra ve ma tran nghich dao cua `mat`
 	Su dung phuong phap khu Gauss-Jordan
 	"""
-	pass
+	if mat.det() == 0:
+		return None
+	
+	aug_mat = mat.augment()
+	aug_mat = aug_mat.gauss_jordan_eliminate()
+	return aug_mat.take_cols(mat.num_col, mat.num_col*2 - 1)
+
+
+

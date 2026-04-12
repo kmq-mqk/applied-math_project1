@@ -1,3 +1,14 @@
+import sys
+import os
+
+# Lấy đường dẫn của thư mục hiện tại (part2) và lùi lại 1 cấp ra thư mục cha (Lab1)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+
+# Thêm thư mục Lab1 vào danh sách tìm kiếm của Python
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
 import math
 from part1.part1_skeleton import Matrix
 

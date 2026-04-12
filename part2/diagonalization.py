@@ -1,7 +1,19 @@
-from part1.part1_skeleton import Matrix
+import sys
+import os
 import numpy as np
 
-# Định nghĩa hàm find_eigenvalues
+# Lấy đường dẫn của thư mục hiện tại (part2) và lùi lại 1 cấp ra thư mục cha (Lab1)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+
+# Thêm thư mục Lab1 vào danh sách tìm kiếm của Python để import được part1
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
+from part1.part1_skeleton import Matrix
+
+# --- ĐỊNH NGHĨA CÁC HÀM ---
+
 def find_eigenvalues(self):
     if self.num_row != self.num_col:
         raise ValueError("Chỉ ma trận vuông mới có giá trị riêng.")
@@ -15,12 +27,14 @@ def find_eigenvalues(self):
                            eigenvalues)
     
     return eigenvalues.tolist()
+
 # Gắn hàm find_eigenvalues vào lớp Matrix
-Matrix.find_eigenvalues = find_eigenvalues()
+Matrix.find_eigenvalues = find_eigenvalues
     
 def diagonalize(self):
     if self.num_row != self.num_col:
         raise ValueError("Ma trận phải là ma trận vuông để chéo hóa.")
+        
     # Bước 1: Tìm danh sách các giá trị riêng (Eigenvalues)
     eigenvalues = self.find_eigenvalues() 
     
@@ -41,10 +55,12 @@ def diagonalize(self):
         M = Matrix(M_data)
         
         # Gọi hàm lấy cơ sở không gian nghiệm (Null space)
-        # Hàm này bạn sẽ phải code trong yêu cầu rank_and_basis() của phần 1
-        basis_vectors = M.get_null_space_basis() 
+        # result có dạng: (rank, (col_space, row_space, null_space))
+        result = M.rank_and_basis()
+        nullspace_vectors = result[1][2]
         
-        for v in basis_vectors:
+        # Lặp qua các vector trong Null space (Đã sửa lỗi ở đây)
+        for v in nullspace_vectors:
             eigenvectors_matrix.append(v)
             diagonal_elements.append(lam)
 
@@ -54,7 +70,7 @@ def diagonalize(self):
 
     # Bước 4: Lắp ráp P và D
     # Xoay eigenvectors_matrix thành các cột để tạo P
-    P_data = [[eigenvectors_matrix[j][i] for j in range(self.num_col)] for i in range(self.num_row)]
+    P_data = [[eigenvectors_matrix[j].data[i] for j in range(self.num_col)] for i in range(self.num_row)]
     P = Matrix(P_data)
 
     # Đặt diagonal_elements lên đường chéo tạo D
@@ -64,27 +80,35 @@ def diagonalize(self):
     return P, D
 
 # Gắn hàm diagonalize vào lớp Matrix
-Matrix.diagonalize = diagonalize()
+Matrix.diagonalize = diagonalize
 
-#Kiểm tra bằng numPy
-import numpy as np
-A = [[4, -2], 
-     [1, 1]]
-P, D = Matrix(A).diagonalize()
-print("P:")
-P.print()
-print("D:")
-D.print()
-# Kiểm tra bằng NumPy
-# Chuyển A sang dạng numpy array để tính toán
-A_np = np.array(A)
-# Tính giá trị riêng và vector riêng bằng NumPy
-eigenvalues, eigenvectors = np.linalg.eig(A_np)
-print("Eigenvalues (NumPy):", eigenvalues)
-print("Eigenvectors (NumPy):\n", eigenvectors)
-# So sánh với kết quả từ hàm diagonalize
-if np.allclose(np.diag(D.data), eigenvalues) and np.allclose(P.data, eigenvectors):
-    print("Kết quả từ diagonalize khớp với NumPy.")     
-else:
-        print("Kết quả từ diagonalize không khớp với NumPy.")
+
+# --- KIỂM TRA CHƯƠNG TRÌNH ---
+if __name__ == "__main__":
+    A = [[4, -2], 
+         [1, 1]]
+         
+    try:
+        P, D = Matrix(A).diagonalize()
+        print("P:")
+        P.print()
+        print("D:")
+        D.print()
+
+        # Kiểm tra bằng cách nhân ma trận (A * P = P * D)
+        A_test = np.array(A)
+        P_test = np.array(P.data)
+        D_test = np.array(D.data)
         
+        AP = A_test.dot(P_test)
+        PD = P_test.dot(D_test)
+
+        # Đối chiếu kết quả
+        print("\n--- Kiểm tra kết quả ---")
+        if np.allclose(AP, PD):
+            print("Kết quả chính xác! Thỏa mãn A * P = P * D")     
+        else:
+            print("Kết quả chưa chính xác, A * P khác P * D")
+            
+    except Exception as e:
+        print(f"Có lỗi xảy ra: {e}")
