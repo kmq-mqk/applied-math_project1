@@ -1,6 +1,7 @@
 import sys
 import os
 import math
+import numpy as np
 
 # Thiết lập đường dẫn để import Matrix từ part1
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -93,8 +94,8 @@ def svd(self):
 # Gán hàm vào class Matrix để sử dụng
 Matrix.svd = svd
 
-if __name__ == "__main__":
-    import numpy as np
+
+    
 
     # Kiểm chứng
 if __name__ == "__main__":
