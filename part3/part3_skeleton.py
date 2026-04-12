@@ -1,0 +1,128 @@
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+	sys.path.append(parent_dir)
+
+from part1.part1_skeleton import Matrix
+import part1.gauss as gauss
+
+
+# ══════════════════════════════════════════════
+# Mục 3.1 — Phương pháp trực tiếp
+# ══════════════════════════════════════════════
+
+def gaussian_solve(a: Matrix, b: list[float]) -> list[float]:
+	"""
+	Giải Ax = b bằng Gauss elimination từ Part 1.
+	Gọi gauss.gaussian_eliminate() rồi lấy nghiệm x.
+
+	Params:
+		a : Matrix hệ số n×n
+		b : vector vế phải
+
+	Returns:
+		x : vector nghiệm (list[float])
+	"""
+	_, x, _ = gauss.gaussian_eliminate(a.data, b)
+	return x
+
+
+def lu_solve(a: Matrix, b: list[float]) -> list[float]:
+	"""
+	Giải Ax = b thông qua phân rã LU (PA = LU).
+
+	Params:
+		a : Matrix hệ số n×n
+		b : vector vế phải
+
+	Returns:
+		x : vector nghiệm (list[float])
+	"""
+	n = a.num_row
+	upper = [a[i][:] for i in range(n)]
+	lower = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
+	perm = list(range(n))
+
+	for k in range(n):
+		max_row = max(range(k, n), key=lambda i: abs(upper[i][k]))
+		if abs(upper[max_row][k]) < 1e-12:
+			raise ValueError("Ma trận suy biến")
+		upper[k], upper[max_row] = upper[max_row], upper[k]
+		perm[k], perm[max_row] = perm[max_row], perm[k]
+		for j in range(k):
+			lower[k][j], lower[max_row][j] = lower[max_row][j], lower[k][j]
+		for i in range(k + 1, n):
+			lower[i][k] = upper[i][k]/upper[k][k]
+			for j in range(k, n):
+				upper[i][j] -= lower[i][k]*upper[k][j]
+
+	pb = [b[perm[i]] for i in range(n)]
+	y = [0.0] * n
+	for i in range(n):
+		y[i] = (pb[i] - sum(lower[i][j]*y[j] for j in range(i)))/lower[i][i]
+
+	x = [0.0] * n
+	for i in range(n - 1, -1, -1):
+		x[i] = (y[i] - sum(upper[i][j]*x[j] for j in range(i + 1, n)))/upper[i][i]
+	return x
+
+
+# ══════════════════════════════════════════════
+# Mục 3.1 — Phương pháp lặp
+# ══════════════════════════════════════════════
+
+class Iterative_Solver:
+	def __init__(self, matrix: Matrix, b: list[float]):
+		self.matrix = matrix
+		self.b = b
+
+	def is_strictly_diagonally_dominant(self):
+		# Kiểm tra điều kiện hội tụ: chéo trội chặt
+		n = self.matrix.num_row
+		for i in range(n):
+			sum_row = sum(abs(self.matrix[i][j]) for j in range(n) if i != j)
+			if abs(self.matrix[i][i]) <= sum_row:
+				return False
+		return True
+
+	def gauss_seidel(self, eps=1e-6, max_iterations=1000):
+		"""
+		Giải Ax = b bằng phương pháp lặp Gauss-Seidel.
+
+		Công thức lặp:
+			x_i^{k+1} = (1/a_ii) * (b_i
+			             - Σ_{j<i} a_ij * x_j^{k+1}   ← đã cập nhật
+			             - Σ_{j>i} a_ij * x_j^k  )      ← chưa cập nhật
+
+		Điều kiện dừng: max|x_i^{k+1} - x_i^k| < eps  (chuẩn vô cùng)
+
+		Returns:
+			x            : vector nghiệm
+			n_iterations : số vòng lặp đã thực hiện
+		"""
+		if not self.is_strictly_diagonally_dominant():
+			print("Warning: Matrix is not strictly diagonally dominant.")
+
+		n = self.matrix.num_row
+		x = [0.0] * n		# khởi tạo nghiệm ban đầu bằng 0
+
+		for k in range(max_iterations):
+			x_old = list(x)
+
+			for i in range(n):
+				# Σ_{j<i} a_ij * x_j^{k+1}  ← dùng x[j] đã cập nhật
+				sigma_lower = sum(self.matrix[i][j]*x[j]     for j in range(i))
+				# Σ_{j>i} a_ij * x_j^k       ← dùng x_old[j] chưa cập nhật
+				sigma_upper = sum(self.matrix[i][j]*x_old[j] for j in range(i + 1, n))
+
+				x[i] = (self.b[i] - sigma_lower - sigma_upper)/self.matrix[i][i]
+
+			# kiểm tra điều kiện dừng (chuẩn vô cùng)
+			diff = max(abs(x[i] - x_old[i]) for i in range(n))
+			if diff < eps:
+				return x, k + 1
+
+		return x, max_iterations
