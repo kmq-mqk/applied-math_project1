@@ -1,8 +1,13 @@
 """
-Part 3
-3.3 Phân tích ổn định số với 2 loại ma trận:
+Part 3 - stability.py  (Mục 3.3)
+Phân tích ổn định số với 2 loại ma trận:
 	- Ma trận Hilbert Hn    : ill-conditioned (số điều kiện rất lớn)
 	- Ma trận ngẫu nhiên SPD: well-conditioned (số điều kiện nhỏ)
+
+Gọi các solver từ part3_skeleton (Mục 3.1):
+	- gaussian_solve  : Gauss elimination (Part 1)
+	- lu_solve        : LU decomposition  (Part 2)
+	- Iterative_Solver.gauss_seidel : Gauss-Seidel
 """
 
 import sys
@@ -10,8 +15,15 @@ import os
 import math
 import random
 
-sys.path.insert(0, os.path.dirname(__file__))
-from part3_skeleton import Iterative_Solver
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+	sys.path.append(parent_dir)
+if current_dir not in sys.path:
+	sys.path.append(current_dir)
+
+from part1.part1_skeleton import Matrix
+from part3_skeleton import gaussian_solve, lu_solve, Iterative_Solver
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -42,74 +54,13 @@ def relative_error(x_approx, x_ref):
 
 
 # ─────────────────────────────────────────────
-# Gaussian Elimination (partial pivoting)
-# ─────────────────────────────────────────────
-
-def gaussian_solve(a, b):
-	"""Giải Ax = b bằng khử Gauss với partial pivoting."""
-	n = len(a)
-	m = [a[i][:] + [b[i]] for i in range(n)]
-
-	for k in range(n):
-		max_row = max(range(k, n), key=lambda i: abs(m[i][k]))
-		if abs(m[max_row][k]) < 1e-12:
-			raise ValueError("Ma trận suy biến")
-		m[k], m[max_row] = m[max_row], m[k]
-		for i in range(k + 1, n):
-			factor = m[i][k]/m[k][k]
-			for j in range(k, n + 1):
-				m[i][j] -= factor*m[k][j]
-
-	x = [0.0] * n
-	for i in range(n - 1, -1, -1):
-		x[i] = (m[i][n] - sum(m[i][j]*x[j] for j in range(i + 1, n)))/m[i][i]
-	return x
-
-
-# ─────────────────────────────────────────────
-# LU Decomposition (PA = LU)
-# ─────────────────────────────────────────────
-
-def lu_solve(a, b):
-	"""Giải Ax = b thông qua phân rã LU."""
-	n = len(a)
-	upper = [a[i][:] for i in range(n)]
-	lower = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
-	perm = list(range(n))
-
-	for k in range(n):
-		max_row = max(range(k, n), key=lambda i: abs(upper[i][k]))
-		if abs(upper[max_row][k]) < 1e-12:
-			raise ValueError("Ma trận suy biến")
-		upper[k], upper[max_row] = upper[max_row], upper[k]
-		perm[k], perm[max_row] = perm[max_row], perm[k]
-		for j in range(k):
-			lower[k][j], lower[max_row][j] = lower[max_row][j], lower[k][j]
-		for i in range(k + 1, n):
-			lower[i][k] = upper[i][k]/upper[k][k]
-			for j in range(k, n):
-				upper[i][j] -= lower[i][k]*upper[k][j]
-
-	# forward substitution: Ly = Pb
-	pb = [b[perm[i]] for i in range(n)]
-	y = [0.0] * n
-	for i in range(n):
-		y[i] = (pb[i] - sum(lower[i][j]*y[j] for j in range(i)))/lower[i][i]
-
-	# back substitution: Ux = y
-	x = [0.0] * n
-	for i in range(n - 1, -1, -1):
-		x[i] = (y[i] - sum(upper[i][j]*x[j] for j in range(i + 1, n)))/upper[i][i]
-	return x
-
-
-# ─────────────────────────────────────────────
-# Matrix generators
+# Matrix generators — trả về Matrix (Part 1)
 # ─────────────────────────────────────────────
 
 def make_hilbert(n):
 	"""Ma trận Hilbert H[i][j] = 1/(i+j+1), nghiệm đúng = [1,...,1]"""
-	a = [[1.0/(i + j + 1) for j in range(n)] for i in range(n)]
+	data = [[1.0/(i + j + 1) for j in range(n)] for i in range(n)]
+	a = Matrix(data)
 	x_true = [1.0] * n
 	b = [sum(a[i][j] for j in range(n)) for i in range(n)]
 	return a, b, x_true
@@ -119,31 +70,31 @@ def make_random_spd(n, seed=42):
 	"""Ma trận SPD ngẫu nhiên: A = B^T*B + n*I"""
 	rng = random.Random(seed)
 	b_mat = [[rng.gauss(0, 1) for _ in range(n)] for _ in range(n)]
-	a = [[sum(b_mat[k][i]*b_mat[k][j] for k in range(n)) for j in range(n)]
-	     for i in range(n)]
+	data = [[sum(b_mat[k][i]*b_mat[k][j] for k in range(n)) for j in range(n)]
+	        for i in range(n)]
 	for i in range(n):
-		a[i][i] += n
+		data[i][i] += n
 	b = [rng.gauss(0, 1) for _ in range(n)]
-	return a, b
+	return Matrix(data), b
 
 
 def make_diag_dominant(n, seed=0):
 	"""Ma trận chéo trội chặt — dùng cho Gauss-Seidel"""
 	rng = random.Random(seed)
-	a = [[0.0]*n for _ in range(n)]
+	data = [[0.0]*n for _ in range(n)]
 	for i in range(n):
 		off_sum = 0.0
 		for j in range(n):
 			if i != j:
-				a[i][j] = rng.uniform(-1, 1)
-				off_sum += abs(a[i][j])
-		a[i][i] = off_sum + 1.0
+				data[i][j] = rng.uniform(-1, 1)
+				off_sum += abs(data[i][j])
+		data[i][i] = off_sum + 1.0
 	b = [rng.uniform(-10, 10) for _ in range(n)]
-	return a, b
+	return Matrix(data), b
 
 
 # ─────────────────────────────────────────────
-# Stability analysis
+# Mục 3.3 — Stability analysis
 # ─────────────────────────────────────────────
 
 def stability_analysis():
@@ -157,7 +108,7 @@ def stability_analysis():
 
 	for n in DEFINE_HILBERT_SIZES:
 		a, b, x_true = make_hilbert(n)
-		cond = np.linalg.cond(np.array(a))
+		cond = np.linalg.cond(np.array(a.data))
 
 		try:
 			err_gauss = relative_error(gaussian_solve(a, b), x_true)
@@ -184,9 +135,9 @@ def stability_analysis():
 		a_spd, b_spd	= make_random_spd(n)
 		a_dd,  b_dd	= make_diag_dominant(n)
 
-		cond		= np.linalg.cond(np.array(a_spd))
-		x_ref		= np.linalg.solve(np.array(a_spd), np.array(b_spd)).tolist()
-		x_ref_dd	= np.linalg.solve(np.array(a_dd),  np.array(b_dd)).tolist()
+		cond		= np.linalg.cond(np.array(a_spd.data))
+		x_ref		= np.linalg.solve(np.array(a_spd.data), np.array(b_spd)).tolist()
+		x_ref_dd	= np.linalg.solve(np.array(a_dd.data),  np.array(b_dd)).tolist()
 
 		err_gauss	= relative_error(gaussian_solve(a_spd, b_spd), x_ref)
 		err_lu		= relative_error(lu_solve(a_spd, b_spd),      x_ref)
