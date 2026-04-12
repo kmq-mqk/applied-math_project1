@@ -8,89 +8,96 @@ parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-from part1.part1_skeleton import Matrix
+from part1.part1_skeleton import Matrix, Vector
 import diagonalization
+
 
 def svd(self):
     """
-    Phân rã SVD đầy đủ (Full SVD): A = U * Sigma * V^T
-    U: m x m, Sigma: m x n, V^T: n x n
+    Phân rã SVD: A = U * Sigma * V^T
+    Sử dụng Numpy chỉ để tìm trị riêng/vector riêng của A^T * A.
+    Các bước còn lại dùng code tự viết.
     """
-    a_t = self.transpose()
     m_dim, n_dim = self.num_row, self.num_col
+    a_t = self.transpose()
     
-    # 1. Tìm V và trị riêng từ A^T * A (n x n)
+    # 1. TÌM V: Chỉ dùng numpy để giải bài toán trị riêng cho A^T * A
     ata = a_t.matmul(self)
-    p_v, d_v = ata.diagonalize()
+    ata_np = np.array(ata.data, dtype=float)
     
-    eigen_pairs_v = []
+    # Sử dụng eigh (chuyên cho ma trận đối xứng) để lấy trị riêng và vector riêng
+    eig_vals, eig_vecs = np.linalg.eigh(ata_np)
+    
+    # 2. SẮP XẾP & CHUẨN HÓA V
+    v_pairs = []
     for i in range(n_dim):
-        lam = d_v.data[i][i]
-        v = [p_v.data[j][i] for j in range(n_dim)]
-        eigen_pairs_v.append((max(0, lam), v)) # max(0, lam) để tránh số âm cực nhỏ do sai số
+        lam = max(0.0, eig_vals[i]) # Tránh số âm rất nhỏ do sai số
+        v_vec = eig_vecs[:, i].tolist()
+        # Chuẩn hóa vector v_i
+        norm_v = math.sqrt(sum(x*x for x in v_vec))
+        v_vec = [x/norm_v for x in v_vec] if norm_v > 1e-12 else v_vec
+        v_pairs.append((lam, v_vec))
     
     # Sắp xếp trị riêng giảm dần
-    eigen_pairs_v.sort(key=lambda x: x[0], reverse=True)
+    v_pairs.sort(key=lambda x: x[0], reverse=True)
     
-    # 2. Tìm U từ A * A^T (m x m)
-    # Tính trực tiếp từ AA^T để lấy đủ m cột trực giao của U
-    aat = self.matmul(a_t)
-    p_u, d_u = aat.diagonalize()
-    
-    eigen_pairs_u = []
-    for i in range(m_dim):
-        lam = d_u.data[i][i]
-        u = [p_u.data[j][i] for j in range(m_dim)]
-        eigen_pairs_u.append((max(0, lam), u))
-    
-    eigen_pairs_u.sort(key=lambda x: x[0], reverse=True)
-    
-    # 3. Lắp ráp ma trận Sigma (m x n)
+    # 3. TẠO SIGMA VÀ V^T
     sigma_data = [[0.0 for _ in range(n_dim)] for _ in range(m_dim)]
-    for i in range(min(m_dim, n_dim)):
-        lam = eigen_pairs_v[i][0]
-        sigma_data[i][i] = math.sqrt(lam)
+    v_t_data = []
+    for i in range(n_dim):
+        lam, v_vec = v_pairs[i]
+        sig = math.sqrt(lam)
+        if i < min(m_dim, n_dim):
+            sigma_data[i][i] = sig
+        v_t_data.append(v_vec)
+    
     sigma = Matrix(sigma_data)
+    v_t = Matrix(v_t_data)
     
-    # 4. Lắp ráp V^T (n x n) và chuẩn hóa vector v
-    v_rows = []
-    for _, v in eigen_pairs_v:
-        norm_v = math.sqrt(sum(x*x for x in v))
-        v_rows.append([x/norm_v for x in v] if norm_v > 1e-12 else v)
-    v_t = Matrix(v_rows)
-    
-    # 5. Lắp ráp U (m x m) và đồng bộ hóa dấu (Sign Correction)
-    # Vì vector riêng có thể ngược dấu (+/-), cần đảm bảo A*vi = sigma_i * ui
-    u_cols_temp = []
-    for _, u in eigen_pairs_u:
-        norm_u = math.sqrt(sum(x*x for x in u))
-        u_cols_temp.append([x/norm_u for x in u] if norm_u > 1e-12 else u)
-        
+    # 4. TÌM U: u_i = A * v_i / sigma_i
+    u_cols = []
     for i in range(min(m_dim, n_dim)):
         sig = sigma_data[i][i]
+        vi = v_t_data[i]
+        
         if sig > 1e-9:
-            vi = v_rows[i]
-            ui = u_cols_temp[i]
-            
-            # Tính A * vi
+            # u_i = A * v_i / sig
             avi = [sum(self.data[r][c] * vi[c] for c in range(n_dim)) for r in range(m_dim)]
+            u_cols.append([val/sig for val in avi])
             
-            # Nếu A*vi ngược hướng với ui, ta đổi dấu cột ui
-            dot = sum(avi[k] * ui[k] for k in range(m_dim))
-            if dot < 0:
-                u_cols_temp[i] = [-x for x in ui]
-                
-    # Chuyển u_cols_temp (danh sách cột) thành u_data (danh sách dòng)
-    u_data = [[u_cols_temp[j][i] for j in range(m_dim)] for i in range(m_dim)]
-    u = Matrix(u_data)
+    # 5. BỔ SUNG CỘT CHO U
+    # Nếu m > n, U cần đủ m cột. Các cột còn lại thuộc Nullspace của A^T.
+    if len(u_cols) < m_dim:
+        _, (_, _, ns) = a_t.rank_and_basis()
+        
+        for vec in ns:
+            if len(u_cols) >= m_dim: break
+            w = vec.data[:]
+            
+            # Trực giao hóa Gram-Schmidt với các cột u đã có để đảm bảo U trực giao
+            for u_existing in u_cols:
+                dot_wu = sum(w[k] * u_existing[k] for k in range(m_dim))
+                w = [w[k] - dot_wu * u_existing[k] for k in range(m_dim)]
+            
+            norm_w = math.sqrt(sum(x*x for x in w))
+            if norm_w > 1e-9:
+                u_cols.append([x/norm_w for x in w])
+
+    # 6. LẮP RÁP MA TRẬN U
+    # Chuyển từ danh sách cột (u_cols) sang dữ liệu hàng cho Matrix class
+    u_final_data = [[u_cols[j][i] for j in range(len(u_cols))] for i in range(m_dim)]
+    u = Matrix(u_final_data)
     
     return u, sigma, v_t
 
+# Gán hàm vào class Matrix để sử dụng
 Matrix.svd = svd
 
-# Kiểm chứng
 if __name__ == "__main__":
     import numpy as np
+
+    # Kiểm chứng
+if __name__ == "__main__":
     A = Matrix([
         [1, 5, -2, 4],
         [-3, 2, 7, 1],
@@ -103,5 +110,6 @@ if __name__ == "__main__":
     print("Kích thước V_T:", len(v_t.data), "x", len(v_t.data[0]))
     
     A_reconstructed = np.matmul(u.data, np.matmul(sigma.data, v_t.data))
+    print(A_reconstructed)
     if np.allclose(A_reconstructed, A.data):
         print("SVD decomposition is correct!")
