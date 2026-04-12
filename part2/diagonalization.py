@@ -27,11 +27,11 @@ def find_eigenvalues(self):
     
     # Làm tròn để khử sai số dấu phẩy động
     # 5 chữ số thập phân là đủ an toàn cho các bài toán đại số tuyến tính cơ bản
-    eigenvalues_rounded = np.round(eigenvalues.real, 5)
+    eigenvalues_rounded = np.round(eigenvalues.real, 8)
     
     # Lọc lấy các giá trị riêng duy nhất
     unique_eigenvalues = np.unique(eigenvalues_rounded).tolist()
-    
+    unique_eigenvalues.sort(reverse=True)
     return unique_eigenvalues
 
 Matrix.find_eigenvalues = find_eigenvalues
@@ -80,8 +80,9 @@ Matrix.diagonalize = diagonalize
 
 # --- KIỂM TRA CHƯƠNG TRÌNH ---
 if __name__ == "__main__":
-    A = [[4, -2], 
-         [1, 1]]
+    A = [[2, 0, -2], 
+         [0, 3, 0],
+         [0, 0, 3]]
          
     try:
         P, D = Matrix(A).diagonalize()
