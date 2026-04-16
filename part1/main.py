@@ -1,6 +1,15 @@
-from .determinant import *
-from .gauss import *
-from .inverse import *
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+	sys.path.append(parent_dir)
+
+
+from part1.determinant import *
+from part1.gauss import *
+from part1.inverse import *
 
 if __name__ == "__main__":
     # Test gauss
