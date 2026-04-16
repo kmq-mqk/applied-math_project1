@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from part1.gauss import gaussian_eliminate
 from part2.decomposition import svd
 from part2.diagonalization import diagonalize
-from part3.solvers import Iterative_Solver
+from part3.part3_skeleton import Iterative_Solver
 from part1.part1_skeleton import Matrix
 
 # --- CẤU HÌNH HỆ THỐNG ---

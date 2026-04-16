@@ -33,6 +33,9 @@ class Matrix:
 	def shape(self):
 		return (self.rows, self.cols)
 
+	def __getitem__(self, index):
+		return self.data[index]
+
 	""" START ATTRIBUTE CHECKING """
 	def is_ref(self):
 		# return True if `self` is REF
