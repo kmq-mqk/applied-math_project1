@@ -1,5 +1,5 @@
-from . import determinant
-from . import gauss
+import determinant
+import gauss
 
 class Matrix:
 	""" START CONSTRUCTORS """
@@ -32,9 +32,6 @@ class Matrix:
 
 	def shape(self):
 		return (self.rows, self.cols)
-
-	def __getitem__(self, index):
-		return self.data[index]
 
 	""" START ATTRIBUTE CHECKING """
 	def is_ref(self):
@@ -101,16 +98,16 @@ class Matrix:
 
 	def inverse(self):
 		# return self^{-1}
-		from .inverse import inverse
+		from inverse import inverse
 		return inverse(self)
 
-	def gaussian_eliminate(self):
+	def gaussian_eliminate(self, b):
 		# return (REF matrix of self, solution, number of steps)
-		return gauss.gaussian_eliminate(self.data)
+		return gauss.gaussian_eliminate(self.data, b)
 	
 	def gauss_jordan_eliminate(self):
 		# return RREF matrix of self
-		from .inverse import gauss_jordan_eliminate as gj
+		from inverse import gauss_jordan_eliminate as gj
 		return gj(self)
 	""" END : GENERATE NEW MATRIX """
 
@@ -130,20 +127,8 @@ class Matrix:
 
 	def rank_and_basis(self):
 		# return (rank, ([basis of C(self)], [basis of R(self)], [basis of N(self)]))
-		from .rank_basis import rank_and_basis as rb
+		from rank_basis import rank_and_basis as rb
 		return rb(self)
-	def transpose(self):
-		# return self^T
-		new_data = [[self.data[i][j] for i in range(self.num_row)] for j in range(self.num_col)]
-		return Matrix(new_data)
-	
-	def matmul(self, other):
-		# return self * other
-		if self.num_col != other.num_row:
-			raise ValueError("Number of columns of the first matrix must equal the number of rows of the second matrix")
-
-		new_data = [[sum(self.data[i][k] * other.data[k][j] for k in range(self.num_col)) for j in range(other.num_col)] for i in range(self.num_row)]
-		return Matrix(new_data)
 	""" END : CALCULATE ON MATRIX """
 
 class Vector:

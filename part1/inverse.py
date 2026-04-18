@@ -1,5 +1,5 @@
-from utils import utils
-from .part1_skeleton import Matrix
+import utils
+from part1_skeleton import Matrix
 
 def gauss_jordan_eliminate(A) -> Matrix:
 	"""
@@ -54,6 +54,3 @@ def inverse(mat):
 	aug_mat = mat.augment()
 	aug_mat = aug_mat.gauss_jordan_eliminate()
 	return aug_mat.take_cols(mat.num_col, mat.num_col*2 - 1)
-
-
-
