@@ -10,3 +10,6 @@ Shared module, contains functions that the project need to use for processing
 ```python
 python -m part1.part1_main.py
 ```
+
+# MANIM VERSION
+Manim Community v0.20.1

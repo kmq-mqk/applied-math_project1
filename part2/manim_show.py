@@ -68,16 +68,21 @@ def fmt(x, decimals=2):
     return f"{x:.{decimals}f}"
 
 
-def np_to_manim_matrix(mat, decimals=2, **kwargs):
+def np_to_manim_matrix(mat, decimals=2, h_buff=1.5, v_buff=1.5, **kwargs):
     """Convert a 2-D numpy array to a Manim Matrix mobject."""
     entries = [[fmt(mat[r, c], decimals) for c in range(mat.shape[1])]
                for r in range(mat.shape[0])]
-    return Matrix(entries, **kwargs)
+    return Matrix(entries, h_buff=h_buff, v_buff=v_buff, **kwargs)
 
 
-def small_matrix(mat, decimals=2, scale=0.55, color=WHITE):
-    m = np_to_manim_matrix(mat, decimals=decimals,
-                            element_to_mobject_config={"color": color})
+def small_matrix(mat, decimals=2, scale=0.55, h_buff=1.5, v_buff=1.5, color=WHITE):
+    m = np_to_manim_matrix(
+        mat,
+        decimals=decimals,
+        element_to_mobject_config={"color": color},
+        h_buff=h_buff,
+        v_buff=v_buff,
+        )
     m.scale(scale)
     return m
 
@@ -194,11 +199,20 @@ class S02_SVD_Intro(Scene):
                       .to_edge(UP)
         self.play(Write(heading))
 
-        intro = mixed_tex(
-            "We will analyze matrix A into the product of 3 matrices:\\"
-            "$$A  =  U \cdot \Sigma \cdot V^T$$",
-            font_size=30, line_spacing=1.5
-        ).next_to(heading, DOWN, buff=0.5)
+        line1 = Text("We will analyze matrix A into the product of 3 matrices:", font_size=30)
+        line2 = MathTex(
+            "A  =  U \cdot \Sigma \cdot V^T",
+            font_size=30
+        )
+        intro = VGroup(line1, line2)\
+            .arrange(DOWN, aligned_edge=UP, buff=0.3)\
+            .next_to(heading, DOWN, buff=0.5)
+
+#        intro = mixed_tex(
+#            "We will analyze matrix A into the product of 3 matrices:"
+#            "$$\\A  =  U \cdot \Sigma \cdot V^T$$",
+#            font_size=30, line_spacing=1.5
+#        ).next_to(heading, DOWN, buff=0.5)
         self.play(FadeIn(intro, shift=DOWN*0.3))
 
         A_label = MathTex(r"A = \begin{bmatrix}3&1\\1&2\end{bmatrix}",
@@ -243,7 +257,9 @@ class S03_SVD_Decompose(Scene):
         lS  = MathTex(r"\Sigma=", font_size=36, color=GREEN)
         lVt = MathTex("V^T=", font_size=36, color=RED)
 
-        row = VGroup(lA, mA, MathTex("="), lU, mU, lS, mSig, lVt, mVt)\
+#        row = VGroup(lA, mA, MathTex("="), lU, mU, lS, mSig, lVt, mVt)\
+#              .arrange(RIGHT, buff=0.22).scale(0.62).next_to(eq, DOWN, buff=0.55)
+        row = VGroup(mA, MathTex("="), mU, mSig, mVt)\
               .arrange(RIGHT, buff=0.22).scale(0.62).next_to(eq, DOWN, buff=0.55)
         self.play(FadeIn(row, shift=UP*0.2))
         self.wait(3)
@@ -313,7 +329,7 @@ class S04_SVD_Transform(Scene):
         self.wait(0.6)
 
         # -- Step 1: apply V^T --
-        step1_title = Text("Buoc 1: nhan V^T  (xoay)", font_size=24, color=RED)\
+        step1_title = mixed_tex("Step 1: multiply by $$V^T$$  (rotate)", font_size=24, color=RED)\
                           .next_to(heading, DOWN, buff=0.1)
         self.play(Write(step1_title))
 
@@ -332,12 +348,12 @@ class S04_SVD_Transform(Scene):
 
         # Show result Z·V^T corner
         ZVt = Vt_mat
-        crn_zvt = corner_label("Z \\cdot V^T =", ZVt, RED)
+        crn_zvt = corner_label("V^T \\cdot Z =", ZVt, RED)
         self.play(Transform(crn, crn_zvt))
         self.wait(0.8)
 
         # -- Step 2: apply Σ --
-        step2_title = Text("Buoc 2: nhan Sigma  (gian)", font_size=24, color=GREEN)\
+        step2_title = mixed_tex("Step 2: multiply by $$Sigma$$  (scale)", font_size=24, color=GREEN)\
                           .next_to(heading, DOWN, buff=0.1)
         self.play(Transform(step1_title, step2_title))
 
@@ -358,7 +374,7 @@ class S04_SVD_Transform(Scene):
         self.wait(0.8)
 
         # -- Step 3: apply U --
-        step3_title = Text("Buoc 3: nhan U  (xoay lai)", font_size=24, color=BLUE)\
+        step3_title = mixed_tex("Step 3: multiply by $$U$$  (last rotate)", font_size=24, color=BLUE)\
                           .next_to(heading, DOWN, buff=0.1)
         self.play(Transform(step1_title, step3_title))
 
@@ -394,11 +410,15 @@ class S05_Diag_Intro(Scene):
                       .to_edge(UP)
         self.play(Write(heading))
 
-        intro = mixed_tex(
-            "Analyze matrix A:\\"
-            "$$A  =  P \cdot D \cdot P^{-1}$$",
-            font_size=30, line_spacing=1.5
-        ).next_to(heading, DOWN, buff=0.5)
+        line1 = Text("Analyze matrix A:", font_size=30)
+        line2 = MathTex(
+            "A = P \\cdot D \\cdot P^{-1}",
+            color=BLUE,
+            font_size=30
+        )
+        intro = VGroup(line1, line2)\
+            .arrange(DOWN, aligned_edge=UP, buff=0.3)\
+            .next_to(heading, DOWN, buff=0.5)
         self.play(FadeIn(intro, shift=DOWN*0.3))
 
         A_label = MathTex(r"A = \begin{bmatrix}3&1\\1&2\end{bmatrix}",
@@ -413,11 +433,62 @@ class S05_Diag_Intro(Scene):
 # ---------------------------------------------
 class S06_Eigen(Scene):
     def construct(self):
-        heading = Text("Gia tri rieng va vector rieng cua A",
-                       font_size=34, color=YELLOW).to_edge(UP)
+        # -- Phuong trinh dac trung --
+        heading = Text("Characteristic Equation", font_size=34, color=YELLOW).to_edge(UP)
         self.play(Write(heading))
 
+        # 1. Dang tong quat
+        gen_eq = MathTex(r"\det(A - \lambda I) = 0", font_size=45).next_to(heading, DOWN, buff=0.1)
+        self.play(Write(gen_eq))
+        self.wait(1)
+
+        # 2. Trien khai
+        a11, a12 = A_MAT[0,0], A_MAT[0,1]
+        a21, a22 = A_MAT[1,0], A_MAT[1,1]
+
+        mat_var = MathTex(
+            r"\det \begin{bmatrix} "
+            r"a_{11} - \lambda & a_{12} \\ "
+            r"a_{21} & a_{22} - \lambda "
+            r"\end{bmatrix} = 0",
+            font_size=40
+        ).next_to(gen_eq, DOWN, buff=1)
+        
+        self.play(Transform(gen_eq, mat_var))
+        self.wait(1)
+
+        # 3. Thay so
+        mat_num = MathTex(
+            r"\det \begin{bmatrix} "
+            rf"{a11:.0f} - \lambda & {a12:.0f} \\ "
+            rf"{a21:.0f} & {a22:.0f} - \lambda "
+            r"\end{bmatrix} = 0",
+            font_size=40
+        ).move_to(mat_var)
+
+        self.play(Transform(gen_eq, mat_num))
+        self.wait(1)
+
+        poly = MathTex(
+            rf"({a11:.0f} - \lambda)({a22:.0f} - \lambda) - ({a12:.0f} \cdot {a21:.0f}) = 0",
+            font_size=36, color=YELLOW
+        ).next_to(mat_num, DOWN, buff=1)
+
+        # Ve duong cheo
+        line_main = Line(mat_num.get_corner(UL), mat_num.get_corner(DR), color=RED).scale(0.7)
+        line_sub  = Line(mat_num.get_corner(UR), mat_num.get_corner(DL), color=GREEN).scale(0.7)
+        
+        self.play(Create(line_main))
+        self.play(Create(line_sub))
+        self.play(Write(poly))
+        self.wait(2)
+
+        self.play(FadeOut(gen_eq, poly, line_main, line_sub))
+
         # -- Eigenvalue display --
+        h1 = Text("Eigenvalues and EigenVectors of A", font_size=34, color=YELLOW).to_edge(UP)
+        self.play(Transform(heading, h1))
+
         lam1_tex = MathTex(
             rf"\lambda_1 = {fmt(eigvals[0])}",
             font_size=38, color=RED
@@ -426,8 +497,8 @@ class S06_Eigen(Scene):
             rf"\lambda_2 = {fmt(eigvals[1])}",
             font_size=38, color=BLUE
         )
-        eigs_grp = VGroup(lam1_tex, lam2_tex).arrange(DOWN, buff=0.5)\
-                       .next_to(heading, DOWN, buff=0.6).shift(LEFT*2)
+        eigs_grp = VGroup(lam1_tex, lam2_tex).arrange(RIGHT, buff=2)\
+                       .next_to(heading, DOWN, buff=1.5).to_edge(LEFT)
         self.play(Write(lam1_tex), Write(lam2_tex))
         self.wait(0.6)
 
@@ -437,11 +508,11 @@ class S06_Eigen(Scene):
         vec1_tex = MathTex(
             rf"v_1 = \begin{{bmatrix}}{fmt(ev1[0])}\\{fmt(ev1[1])}\end{{bmatrix}}",
             font_size=38, color=RED
-        ).next_to(lam1_tex, RIGHT, buff=1.5)
+        ).next_to(lam1_tex, DOWN, buff=1.5)
         vec2_tex = MathTex(
             rf"v_2 = \begin{{bmatrix}}{fmt(ev2[0])}\\{fmt(ev2[1])}\end{{bmatrix}}",
             font_size=38, color=BLUE
-        ).next_to(lam2_tex, RIGHT, buff=1.5)
+        ).next_to(lam2_tex, DOWN, buff=1.5)
 
         self.play(FadeIn(vec1_tex, shift=LEFT*0.2))
         self.play(FadeIn(vec2_tex, shift=LEFT*0.2))
@@ -478,8 +549,12 @@ class S07_Diag_Build(Scene):
         self.play(Write(heading))
 
         # -- Helper: labeled matrix block --
-        def named_block(name_tex, mat, color=WHITE, decimals=3):
+        def named_block(name_tex, mat=None, color=WHITE, decimals=3):
             name = MathTex(name_tex, font_size=32, color=color).set_stroke(width=0)
+
+            if mat is None:
+                return name
+
             m    = small_matrix(mat, decimals=decimals, color=color)
             return VGroup(name, m).arrange(DOWN, buff=0.18)
 
@@ -488,8 +563,15 @@ class S07_Diag_Build(Scene):
                      font_size=22, color=GRAY).next_to(heading, DOWN, buff=0.1)
         self.play(Write(step1))
 
-        P_block = named_block("P", P_mat, ORANGE).move_to(ORIGIN)
+        P_block = MathTex("P = [v_1 \quad v_2]", color=ORANGE).move_to(ORIGIN)
         self.play(FadeIn(P_block, shift=UP*0.3))
+        self.wait(0.5)
+        eq_symbol = Text("=")
+        expanded_P = small_matrix(P_mat, color=ORANGE)
+        grp_eq_exp_P = VGroup(eq_symbol, expanded_P).arrange(RIGHT, buff=0.1).next_to(P_block, RIGHT, buff=0.1)
+        self.play(FadeIn(grp_eq_exp_P))
+        expanded_P = named_block("P", P_mat, ORANGE).move_to(ORIGIN)
+        self.play(Transform(P_block, expanded_P))
         self.wait(1)
 
         # -- Step 2: show P^{-1} beside P --
@@ -504,11 +586,9 @@ class S07_Diag_Build(Scene):
         self.wait(1)
 
         # -- Step 3: insert D in the middle, prepend A= --
-        step3 = Text("Hien thi A = P D P^{-1}", font_size=22, color=GRAY)\
-                    .next_to(heading, DOWN, buff=0.1)
-        self.play(Transform(step1, step3))
+        self.play(FadeOut(step1))
 
-        D_block  = named_block("D", D_mat, GREEN)
+        D_block  = named_block("D", None, GREEN)
         eq_A     = MathTex("A =", font_size=36)
         full_row = VGroup(eq_A, P_block.copy(), D_block, Pinv_block.copy())\
                        .arrange(RIGHT, buff=0.55).scale(0.9).move_to(ORIGIN)
@@ -526,7 +606,7 @@ class S07_Diag_Build(Scene):
 # ---------------------------------------------
 class S08_Diag_D(Scene):
     def construct(self):
-        heading = Text("D = P^{-1} A P", font_size=38, color=YELLOW).to_edge(UP)
+        heading = mixed_tex("Calculate matrix $$D$$", font_size=38, color=YELLOW).to_edge(UP)
         self.play(Write(heading))
 
         def sm(mat, color=WHITE, dec=3):
@@ -547,8 +627,8 @@ class S08_Diag_D(Scene):
         # Expand with values
         lhs = MathTex("D =", font_size=36, color=GREEN)
         row = VGroup(lhs, Pinv_m,
-                     MathTex(r"\\cdot", font_size=30), A_m,
-                     MathTex(r"\\cdot", font_size=30), P_m)\
+                     MathTex("\cdot", font_size=30), A_m,
+                     MathTex("\cdot", font_size=30), P_m)\
               .arrange(RIGHT, buff=0.25).scale(0.9).next_to(eq1, DOWN, buff=0.55)
         self.play(FadeIn(row, shift=UP*0.2))
         self.wait(0.8)
@@ -587,17 +667,17 @@ class S09_Diag_Final(Scene):
         self.wait(1)
 
         # -- Expand A --
-        A_lbl  = MathTex("A =", font_size=34)
+        A_lbl  = MathTex("A", font_size=34)
         A_m    = sm(A_MAT, WHITE, dec=1)
-        A_row  = VGroup(A_lbl, A_m).arrange(RIGHT, buff=0.2)
+        A_row  = VGroup(A_lbl, A_m).arrange(DOWN, buff=0.1)
 
         eq_row_sym = MathTex("=", font_size=34)
 
-        P_lbl  = MathTex("P =", font_size=28, color=ORANGE)
+        P_lbl  = MathTex("P", font_size=28, color=ORANGE)
         P_m    = sm(P_mat, ORANGE)
-        D_lbl  = MathTex("D =", font_size=28, color=GREEN)
+        D_lbl  = MathTex("D", font_size=28, color=GREEN)
         D_m    = sm(D_mat, GREEN)
-        Pi_lbl = MathTex("P^{-1}=", font_size=28, color=PURPLE)
+        Pi_lbl = MathTex("P^{-1}", font_size=28, color=PURPLE)
         Pi_m   = sm(P_inv, PURPLE)
 
         P_blk  = VGroup(P_lbl,  P_m ).arrange(DOWN, buff=0.1)
