@@ -2,7 +2,7 @@
 manim_show.py
 Visualization of SVD and Diagonalization
 Run with:
-    manim -pqh manim_show.py FullShow
+    manim -pqh manim_show.py demo_video
 """
 
 from manim import *
@@ -68,14 +68,14 @@ def fmt(x, decimals=2):
     return f"{x:.{decimals}f}"
 
 
-def np_to_manim_matrix(mat, decimals=2, h_buff=1.5, v_buff=1.5, **kwargs):
+def np_to_manim_matrix(mat, decimals=2, h_buff=1.7, v_buff=0.7, **kwargs):
     """Convert a 2-D numpy array to a Manim Matrix mobject."""
     entries = [[fmt(mat[r, c], decimals) for c in range(mat.shape[1])]
                for r in range(mat.shape[0])]
     return Matrix(entries, h_buff=h_buff, v_buff=v_buff, **kwargs)
 
 
-def small_matrix(mat, decimals=2, scale=0.55, h_buff=1.5, v_buff=1.5, color=WHITE):
+def small_matrix(mat, decimals=2, scale=0.55, h_buff=1.7, v_buff=0.7, color=WHITE):
     m = np_to_manim_matrix(
         mat,
         decimals=decimals,
@@ -138,7 +138,7 @@ class S01_Title(Scene):
 
         # Step 1
         step_label = mixed_tex("Step 1: $$V^T$$  (rotation)", font_size=23, color=YELLOW)\
-                          .to_edge(DOWN, buff=0)
+                            .to_edge(DOWN, buff=0)
         disk2 = make_transformed_disk(Vt_mat)
         nv1, nv2 = make_basis_arrows(Vt_mat)
         self.play(
@@ -152,7 +152,7 @@ class S01_Title(Scene):
         
         # Step 2
         step_label2 = mixed_tex("Step 2: $$\Sigma$$  (scale)", font_size=23, color=YELLOW)\
-                          .to_edge(DOWN, buff=0)
+                            .to_edge(DOWN, buff=0)
         disk3 = make_transformed_disk(Sigma_mat @ Vt_mat)
         nv1b, nv2b = make_basis_arrows(Sigma_mat @ Vt_mat)
         self.play(
@@ -180,7 +180,6 @@ class S01_Title(Scene):
 
         diag_note = mixed_tex("Diagonalization:", font_size=25, color=GREEN_B)\
                         .next_to(title, DOWN, buff=0.2)
-#        self.play(FadeOut(step_label))
         self.play(FadeOut(i) for i in [step_label, v1, v2, ax, circle])
         self.play(Transform(svd_label, diag_note))
         diag_intro = MathTex("A = P\\cdot D \\cdot P^{-1}", font_size=46, color=BLUE)\
@@ -196,28 +195,24 @@ class S01_Title(Scene):
 class S02_SVD_Intro(Scene):
     def construct(self):
         heading = Text("Singular Value Decomposition  (SVD)", font_size=46, color=YELLOW)\
-                      .to_edge(UP)
+                        .to_edge(UP)
         self.play(Write(heading))
 
         line1 = Text("We will analyze matrix A into the product of 3 matrices:", font_size=30)
-        line2 = MathTex(
-            "A  =  U \cdot \Sigma \cdot V^T",
-            font_size=30
+        line2 = mixed_tex(
+            "Let $$A  =  U \cdot \Sigma \cdot V^T$$",
+            font_size=30,
+            color=BLUE
         )
         intro = VGroup(line1, line2)\
             .arrange(DOWN, aligned_edge=UP, buff=0.3)\
             .next_to(heading, DOWN, buff=0.5)
 
-#        intro = mixed_tex(
-#            "We will analyze matrix A into the product of 3 matrices:"
-#            "$$\\A  =  U \cdot \Sigma \cdot V^T$$",
-#            font_size=30, line_spacing=1.5
-#        ).next_to(heading, DOWN, buff=0.5)
         self.play(FadeIn(intro, shift=DOWN*0.3))
 
         A_label = MathTex(r"A = \begin{bmatrix}3&1\\1&2\end{bmatrix}",
-                          font_size=44, color=WHITE)\
-                      .next_to(intro, DOWN, buff=0.6)
+                            font_size=44, color=WHITE)\
+                            .next_to(intro, DOWN, buff=0.6)
         self.play(Write(A_label))
         self.wait(2.5)
         self.play(*[FadeOut(m) for m in self.mobjects])
@@ -233,7 +228,7 @@ class S03_SVD_Decompose(Scene):
 
         # A = U Σ V^T  symbolic
         eq = MathTex(r"A", r"=", r"U", r"\Sigma", r"V^T",
-                     font_size=48)
+                        font_size=48)
         eq.set_color_by_tex("U", BLUE)
         eq.set_color_by_tex(r"\Sigma", GREEN)
         eq.set_color_by_tex(r"V^T", RED)
@@ -257,10 +252,8 @@ class S03_SVD_Decompose(Scene):
         lS  = MathTex(r"\Sigma=", font_size=36, color=GREEN)
         lVt = MathTex("V^T=", font_size=36, color=RED)
 
-#        row = VGroup(lA, mA, MathTex("="), lU, mU, lS, mSig, lVt, mVt)\
-#              .arrange(RIGHT, buff=0.22).scale(0.62).next_to(eq, DOWN, buff=0.55)
         row = VGroup(mA, MathTex("="), mU, mSig, mVt)\
-              .arrange(RIGHT, buff=0.22).scale(0.62).next_to(eq, DOWN, buff=0.55)
+                .arrange(RIGHT, buff=0.22).scale(0.62).next_to(eq, DOWN, buff=0.55)
         self.play(FadeIn(row, shift=UP*0.2))
         self.wait(3)
         self.play(*[FadeOut(m) for m in self.mobjects])
@@ -272,7 +265,7 @@ class S03_SVD_Decompose(Scene):
 class S04_SVD_Transform(Scene):
     def construct(self):
         heading = Text("SVD: transformation on unit disk", font_size=34, color=YELLOW)\
-                      .to_edge(UP)
+                        .to_edge(UP)
         self.play(Write(heading))
 
         # -- Axes --
@@ -294,24 +287,24 @@ class S04_SVD_Transform(Scene):
                     v = transform @ v
                 pts.append(ax.c2p(*v))
             return Polygon(*pts, color=GRAY, fill_color=GRAY, fill_opacity=0.4,
-                           stroke_width=1.5)
+                            stroke_width=1.5)
 
         def make_arrow(vec, color, transform=None):
             v = transform @ vec if transform is not None else vec
             return Arrow(ax.c2p(0, 0), ax.c2p(*v), buff=0,
-                         color=color, stroke_width=3, max_tip_length_to_length_ratio=0.15)
+                            color=color, stroke_width=3, max_tip_length_to_length_ratio=0.15)
 
         disk  = make_disk()
         arr_e1 = make_arrow(np.array([1,0]), RED)
         arr_e2 = make_arrow(np.array([0,1]), BLUE)
 
-        Z_name = MathTex("Z = I_{2}", font_size=30).next_to(ax, UP, buff=0.08)
+        Z_name = MathTex("I_{2}", font_size=30).next_to(ax, UP, buff=0.08)
         self.play(FadeIn(disk), GrowArrow(arr_e1), GrowArrow(arr_e2), Write(Z_name))
         self.wait(0.5)
 
         # -- Corner panel: current matrix value --
-        corner_bg = Rectangle(width=4.6, height=5.5, color=DARK_GRAY,
-                               fill_color=DARK_GRAY, fill_opacity=0.5)\
+        corner_bg = Rectangle(width=7, height=5.5, color=DARK_GRAY,
+                                fill_color=DARK_GRAY, fill_opacity=0.5)\
                         .to_edge(RIGHT, buff=0.2).shift(DOWN*0.3)
         self.play(FadeIn(corner_bg))
 
@@ -322,21 +315,23 @@ class S04_SVD_Transform(Scene):
                                 .move_to(corner_bg.get_center())
             return grp
 
+        eq_symbol = MathTex("=", font_size=28, color=PINK)
         # -- Step 0: show Z = I --
         I_mat = np.eye(2)
-        crn = corner_label("Z = I", I_mat)
+        crn = corner_label("I", I_mat)
         self.play(FadeIn(crn))
-        self.wait(0.6)
+        self.wait(0.1)
 
         # -- Step 1: apply V^T --
         step1_title = mixed_tex("Step 1: multiply by $$V^T$$  (rotate)", font_size=24, color=RED)\
-                          .next_to(heading, DOWN, buff=0.1)
+                            .next_to(heading, DOWN, buff=0.1)
         self.play(Write(step1_title))
 
         # Show V^T corner
-        crn_vt = corner_label("V^T =", Vt_mat, RED)
-        self.play(Transform(crn, crn_vt))
-        self.wait(0.3)
+        ZVt = Vt_mat
+        crn_vtz = corner_label("V^T \\cdot I =", ZVt, RED)
+        self.play(Transform(crn, crn_vtz))
+        self.wait(0.2)
 
         # Transform disk
         disk2   = make_disk(Vt_mat)
@@ -346,58 +341,77 @@ class S04_SVD_Transform(Scene):
                   Transform(arr_e1, arr1_e1),
                   Transform(arr_e2, arr1_e2), run_time=1.8)
 
-        # Show result Z·V^T corner
-        ZVt = Vt_mat
-        crn_zvt = corner_label("V^T \\cdot Z =", ZVt, RED)
-        self.play(Transform(crn, crn_zvt))
-        self.wait(0.8)
+        # Show result V^T·Z corner
+        crn_vt = corner_label("V^T =", Vt_mat, RED)
+        self.play(Transform(crn, crn_vt))
+        self.wait(0.5)
 
         # -- Step 2: apply Σ --
-        step2_title = mixed_tex("Step 2: multiply by $$Sigma$$  (scale)", font_size=24, color=GREEN)\
-                          .next_to(heading, DOWN, buff=0.1)
-        self.play(Transform(step1_title, step2_title))
-
-        crn_sig = corner_label(r"\Sigma =", Sigma_mat, GREEN)
-        self.play(Transform(crn, crn_sig))
-        self.wait(0.3)
+        self.play(FadeOut(crn))
 
         T2 = Sigma_mat @ Vt_mat
+
+        step2_title = mixed_tex("Step 2: multiply by $$\Sigma$$  (scale)", font_size=24, color=GREEN)\
+                            .next_to(heading, DOWN, buff=0.1)
+        self.play(Transform(step1_title, step2_title))
+
+        res_tex = MathTex("\\Sigma \\cdot V^T =", color=GREEN, font_size=28)\
+                            .move_to(corner_bg.get_top(), aligned_edge=UP)
+        grp_mat = VGroup(small_matrix(Sigma_mat, color=GREEN), small_matrix(Vt_mat, color=GREEN))\
+                            .arrange(RIGHT, buff=0.1)\
+                            .next_to(res_tex, DOWN, buff=0.2)
+        res_mat = VGroup(eq_symbol, small_matrix(T2, color=GREEN))\
+                            .arrange(RIGHT, buff=0.1)\
+                            .next_to(grp_mat, DOWN, buff=0.2)
+        self.play(Write(res_tex), FadeIn(grp_mat), FadeIn(res_mat))
+
         disk3   = make_disk(T2)
         arr2_e1 = make_arrow(np.array([1,0]), RED,  T2)
         arr2_e2 = make_arrow(np.array([0,1]), BLUE, T2)
         self.play(Transform(disk, disk3),
                   Transform(arr_e1, arr2_e1),
                   Transform(arr_e2, arr2_e2), run_time=1.8)
+        self.wait(0.7)
 
-        crn_svt = corner_label(r"\Sigma V^T =", T2, GREEN)
-        self.play(Transform(crn, crn_svt))
-        self.wait(0.8)
 
         # -- Step 3: apply U --
+        T3 = U_mat @ Sigma_mat @ Vt_mat
+
         step3_title = mixed_tex("Step 3: multiply by $$U$$  (last rotate)", font_size=24, color=BLUE)\
                           .next_to(heading, DOWN, buff=0.1)
         self.play(Transform(step1_title, step3_title))
 
-        crn_u = corner_label("U =", U_mat, BLUE)
-        self.play(Transform(crn, crn_u))
-        self.wait(0.3)
+        new_tex = MathTex("A = U \\cdot \\Sigma \\cdot V^T =", color=BLUE, font_size=28)\
+                          .move_to(corner_bg.get_top(), aligned_edge=UP)
+        new_grp_mat = VGroup(small_matrix(U_mat, color=BLUE), small_matrix(Sigma_mat, color=BLUE), small_matrix(Vt_mat, color=BLUE))\
+                          .arrange(RIGHT, buff=0.1)\
+                          .next_to(res_tex, DOWN, buff=0.2)
+        new_res_mat = VGroup(eq_symbol, small_matrix(T3, color=GREEN))\
+                            .arrange(RIGHT, buff=0.1)\
+                            .next_to(grp_mat, DOWN, buff=0.2)
+        self.play(
+            Transform(res_tex, new_tex),
+            Transform(grp_mat, new_grp_mat),
+            Transform(res_mat, new_res_mat),
+        )
 
-        T3 = U_mat @ Sigma_mat @ Vt_mat   # ~= A
         disk4   = make_disk(T3)
         arr3_e1 = make_arrow(np.array([1,0]), RED,  T3)
         arr3_e2 = make_arrow(np.array([0,1]), BLUE, T3)
         self.play(Transform(disk, disk4),
                   Transform(arr_e1, arr3_e1),
                   Transform(arr_e2, arr3_e2), run_time=1.8)
-
-        crn_A = corner_label("A = U\\Sigma V^T =", T3, YELLOW)
-        self.play(Transform(crn, crn_A))
         self.wait(1.5)
 
-        final = MathTex(r"A = U\Sigma V^T", font_size=38, color=YELLOW)\
-                    .next_to(heading, DOWN, buff=0.1)
-        self.play(Transform(step1_title, final))
-        self.wait(2)
+
+#        crn_A = corner_label("A = U\\Sigma V^T =", T3, YELLOW)
+#        self.play(Transform(crn, crn_A))
+#        self.wait(1.5)
+
+#        final = MathTex(r"A = U\Sigma V^T", font_size=38, color=YELLOW)\
+#                    .next_to(heading, DOWN, buff=0.1)
+#        self.play(Transform(step1_title, final))
+#        self.wait(2)
         self.play(*[FadeOut(m) for m in self.mobjects])
 
 
@@ -570,6 +584,8 @@ class S07_Diag_Build(Scene):
         expanded_P = small_matrix(P_mat, color=ORANGE)
         grp_eq_exp_P = VGroup(eq_symbol, expanded_P).arrange(RIGHT, buff=0.1).next_to(P_block, RIGHT, buff=0.1)
         self.play(FadeIn(grp_eq_exp_P))
+        self.wait(0.5)
+        self.play(FadeOut(grp_eq_exp_P))
         expanded_P = named_block("P", P_mat, ORANGE).move_to(ORIGIN)
         self.play(Transform(P_block, expanded_P))
         self.wait(1)
@@ -621,7 +637,7 @@ class S08_Diag_D(Scene):
         eq1.set_color_by_tex("P", ORANGE)
         eq1.set_color_by_tex("D", GREEN)
 
-        self.play(Write(eq1))
+        self.play(Write(eq1.next_to(heading, DOWN, buff=1)))
         self.wait(0.8)
 
         # Expand with values
@@ -648,7 +664,7 @@ class S08_Diag_D(Scene):
 # ---------------------------------------------
 class S09_Diag_Final(Scene):
     def construct(self):
-        heading = mixed_tex("Ket qua: $$A = P \cdot D \cdot P^{-1}$$", font_size=38, color=YELLOW)\
+        heading = Text("Result:", font_size=38, color=YELLOW)\
                       .to_edge(UP)
         self.play(Write(heading))
 
