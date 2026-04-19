@@ -4,10 +4,6 @@ Phân tích ổn định số với 2 loại ma trận:
 	- Ma trận Hilbert Hn    : ill-conditioned (số điều kiện rất lớn)
 	- Ma trận ngẫu nhiên SPD: well-conditioned (số điều kiện nhỏ)
 
-Gọi các solver từ part3_skeleton (Mục 3.1):
-	- gaussian_solve  : Gauss elimination (Part 1)
-	- lu_solve        : LU decomposition  (Part 2)
-	- Iterative_Solver.gauss_seidel : Gauss-Seidel
 """
 
 import sys
@@ -28,20 +24,10 @@ from part3_skeleton import gaussian_solve, lu_solve, Iterative_Solver
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-# ─────────────────────────────────────────────
-# DEFINES
-# ─────────────────────────────────────────────
-
 DEFINE_HILBERT_SIZES	= [3, 5, 7, 9, 11, 13]
 DEFINE_SPD_SIZES	= [10, 30, 50, 100]
 DEFINE_GS_EPS		= 1e-10
 DEFINE_GS_MAX_ITER	= 2000
-
-
-# ─────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────
 
 def vec_sub(a, b):
 	return [a[i] - b[i] for i in range(len(a))]
@@ -52,11 +38,7 @@ def norm2(v):
 def relative_error(x_approx, x_ref):
 	return norm2(vec_sub(x_approx, x_ref))/norm2(x_ref)
 
-
-# ─────────────────────────────────────────────
-# Matrix generators — trả về Matrix (Part 1)
-# ─────────────────────────────────────────────
-
+# trả về Matrix (Part 1)
 def make_hilbert(n):
 	"""Ma trận Hilbert H[i][j] = 1/(i+j+1), nghiệm đúng = [1,...,1]"""
 	data = [[1.0/(i + j + 1) for j in range(n)] for i in range(n)]
@@ -93,9 +75,7 @@ def make_diag_dominant(n, seed=0):
 	return Matrix(data), b
 
 
-# ─────────────────────────────────────────────
-# Mục 3.3 — Stability analysis
-# ─────────────────────────────────────────────
+# 3.3 Stability analysis
 
 def stability_analysis():
 	hilbert_data	= {"sizes": [], "conds": [], "err_gauss": [], "err_lu": []}
@@ -156,10 +136,7 @@ def stability_analysis():
 	return hilbert_data, spd_data
 
 
-# ─────────────────────────────────────────────
 # Plotting
-# ─────────────────────────────────────────────
-
 def plot_stability(hilbert_data, spd_data):
 	fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
@@ -190,11 +167,7 @@ def plot_stability(hilbert_data, spd_data):
 	plt.close()
 	print("\n[OK] stability_analysis.png")
 
-
-# ─────────────────────────────────────────────
 # Main
-# ─────────────────────────────────────────────
-
 if __name__ == "__main__":
 	hilbert_data, spd_data = stability_analysis()
 	plot_stability(hilbert_data, spd_data)

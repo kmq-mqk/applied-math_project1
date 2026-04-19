@@ -10,13 +10,10 @@ from part1.part1_skeleton import Matrix
 import part1.gauss as gauss
 
 
-# ══════════════════════════════════════════════
-# Mục 3.1 — Phương pháp trực tiếp
-# ══════════════════════════════════════════════
-
+# 3.1 
 def gaussian_solve(a: Matrix, b: list[float]) -> list[float]:
 	"""
-	Giải Ax = b bằng Gauss elimination từ Part 1.
+	Giải Ax = b bằng Gauss elimination
 	Gọi gauss.gaussian_eliminate() rồi lấy nghiệm x.
 
 	Params:
@@ -32,7 +29,7 @@ def gaussian_solve(a: Matrix, b: list[float]) -> list[float]:
 
 def lu_solve(a: Matrix, b: list[float]) -> list[float]:
 	"""
-	Giải Ax = b thông qua phân rã LU (PA = LU).
+	Giải Ax = b thông qua phân rã LU 
 
 	Params:
 		a : Matrix hệ số n×n
@@ -70,17 +67,13 @@ def lu_solve(a: Matrix, b: list[float]) -> list[float]:
 	return x
 
 
-# ══════════════════════════════════════════════
-# Mục 3.1 — Phương pháp lặp
-# ══════════════════════════════════════════════
-
+# Phương pháp lặp 
 class Iterative_Solver:
 	def __init__(self, matrix: Matrix, b: list[float]):
 		self.matrix = matrix
 		self.b = b
 
 	def is_strictly_diagonally_dominant(self):
-		# Kiểm tra điều kiện hội tụ: chéo trội chặt
 		n = self.matrix.num_row
 		for i in range(n):
 			sum_row = sum(abs(self.matrix[i][j]) for j in range(n) if i != j)
