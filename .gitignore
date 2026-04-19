@@ -2,5 +2,11 @@
 __pycache__/
 *.pyc
 
+# manim
+media/
+
 # testing
-*test*
+**/*test*
+
+# backup
+**/backup*/*

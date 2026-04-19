@@ -1,19 +1,17 @@
-from gauss import gaussian_eliminate
+from gauss import gaussian_eliminate # type: ignore
 
 def determinant(A):
-    A_bar, _ , s = gaussian_eliminate(A) # Take aumented A_bar
+	# check 
+	if (len(A) != len(A[0])):
+		return None
+	
+	A, _ , s = gaussian_eliminate(A) 
 
-    n = len(A_bar)
-    res = 1
+	n = len(A)
+	res = 1
 
-    for i in range(n):
-        res *= A_bar[i][i]
-    res *= (-1)**s
-    return round(res,2 )
-
-# Test
-A = [[3, 2, -4], 
-     [2, 3, 3], 
-     [5, -3, 1]]
-print(determinant(A))
+	for i in range(n):
+		res *= A[i][i]
+	res *= (-1)**s
+	return res
 
