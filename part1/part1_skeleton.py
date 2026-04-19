@@ -1,5 +1,7 @@
-import determinant
-import gauss
+from operator import index
+
+from . import determinant
+from . import gauss
 
 class Matrix:
 	""" START CONSTRUCTORS """
@@ -58,7 +60,34 @@ class Matrix:
 				if i != j and mat[i][j]:
 					return False
 		return True
-			
+	
+	def __getitem__(self, index):
+		return self.data[index]
+
+	def transpose(self):
+		# Tạo dữ liệu mới bằng cách đổi hàng thành cột
+		new_data = [[self.data[j][i] for j in range(self.num_row)] for i in range(self.num_col)]
+		# Trả về một đối tượng Matrix mới (đảm bảo file này đã import Matrix hoặc dùng chính class này)
+		return Matrix(new_data)
+
+	def matmul(self, other):
+		# 1. Kiểm tra điều kiện kích thước
+		if self.num_col != other.num_row:
+			raise ValueError(f"Không thể nhân ma trận: {self.num_row}x{self.num_col} và {other.num_row}x{other.num_col}")
+
+		# 2. Tạo ma trận rỗng (m hàng của A x p cột của B)
+		# Sử dụng list comprehension để tối ưu tốc độ trong Python thuần
+		result_data = [
+			[
+				sum(self.data[i][k] * other.data[k][j] for k in range(self.num_col))
+				for j in range(other.num_col)
+			]
+			for i in range(self.num_row)
+		]
+
+		# 3. Trả về đối tượng Matrix mới
+		return Matrix(result_data)
+
 	def is_identity(self):
 		mat = self.data
 		for i in range(self.num_row):
@@ -98,7 +127,7 @@ class Matrix:
 
 	def inverse(self):
 		# return self^{-1}
-		from inverse import inverse
+		from part1.inverse import inverse
 		return inverse(self)
 
 	def gaussian_eliminate(self, b):
@@ -107,7 +136,7 @@ class Matrix:
 	
 	def gauss_jordan_eliminate(self):
 		# return RREF matrix of self
-		from inverse import gauss_jordan_eliminate as gj
+		from part1.inverse import gauss_jordan_eliminate as gj
 		return gj(self)
 	""" END : GENERATE NEW MATRIX """
 
@@ -127,7 +156,7 @@ class Matrix:
 
 	def rank_and_basis(self):
 		# return (rank, ([basis of C(self)], [basis of R(self)], [basis of N(self)]))
-		from rank_basis import rank_and_basis as rb
+		from part1.rank_basis import rank_and_basis as rb
 		return rb(self)
 	""" END : CALCULATE ON MATRIX """
 
