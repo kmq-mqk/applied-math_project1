@@ -96,14 +96,31 @@ class S01_Title(Scene):
                      font_size=52, color=YELLOW,
                      line_spacing=1.3).move_to(ORIGIN)
         self.play(Write(title), run_time=2)
+        self.wait(0.5)
+        self.play(title.animate.to_edge(UP).scale(0.6))
+        members_name = Text(
+                       "Khúc Minh Quân         \n"
+                       "Phạm Nguyễn Quang Sáng \n"
+                       "Nguyễn Lê Anh Kiên     \n"
+                       "Lê Công Minh Nhựt      \n"
+                       "Nguyễn Đức Quân        ", font_size=20)
+        members_mssv = Text(
+                        "- 24120126\n"
+                        "- 24120132\n"
+                        "- 24120196\n"
+                        "- 24120211\n"
+                        "- 24120218"
+                        ,font_size=20)
+        grp_members = VGroup(members_name, members_mssv).arrange(RIGHT, buff=0.5).next_to(title, DOWN, buff=1)
+        self.play(FadeIn(members))
         self.wait(2)
+        self.play(FadeOut(members))
 
         # -- Quick teaser: Rotate -> Scale -> Rotate on unit disk --
         ax = Axes(x_range=[-2.2, 2.2, 1], y_range=[-2.2, 2.2, 1],
                   x_length=4, y_length=4,
                   axis_config={"include_tip": False}).scale(0.7).move_to(ORIGIN + DOWN*0.5)
 
-        self.play(title.animate.to_edge(UP).scale(0.6))
         self.play(Create(ax))
 
         circle = Circle(radius=1, color=GRAY, fill_opacity=0.35).move_to(ax.c2p(0, 0))
@@ -199,8 +216,8 @@ class S02_SVD_Intro(Scene):
         self.play(Write(heading))
 
         line1 = Text("We will analyze matrix A into the product of 3 matrices:", font_size=30)
-        line2 = mixed_tex(
-            "Let $$A  =  U \cdot \Sigma \cdot V^T$$",
+        line2 = MathTex(
+            "A  =  U \\cdot \\Sigma \\cdot V^T",
             font_size=30,
             color=BLUE
         )
@@ -210,11 +227,14 @@ class S02_SVD_Intro(Scene):
 
         self.play(FadeIn(intro, shift=DOWN*0.3))
 
-        A_label = MathTex(r"A = \begin{bmatrix}3&1\\1&2\end{bmatrix}",
-                            font_size=44, color=WHITE)\
-                            .next_to(intro, DOWN, buff=0.6)
+#        A_label = MathTex(r"A = \begin{bmatrix}3&1\\1&2\end{bmatrix}",
+#                            font_size=44, color=WHITE)\
+#                            .next_to(intro, DOWN, buff=0.6)
+        A_label = VGroup(Text("Let", color=PINK, font_size=28), MathTex("A =", color=BLUE), small_matrix(scale=1.0, mat=A_MAT, color=WHITE))\
+                        .arrange(RIGHT, buff=0.2)
+
         self.play(Write(A_label))
-        self.wait(2.5)
+        self.wait(2)
         self.play(*[FadeOut(m) for m in self.mobjects])
 
 
@@ -288,18 +308,41 @@ class S04_SVD_Transform(Scene):
                 pts.append(ax.c2p(*v))
             return Polygon(*pts, color=GRAY, fill_color=GRAY, fill_opacity=0.4,
                             stroke_width=1.5)
+        
+        def make_grid(ax, M, x_range=(-2, 2), y_range=(-2, 2), step=0.5):
+            lines = VGroup()
+
+            # vertical lines: x = c
+            for c in np.arange(x_range[0], x_range[1] + 1e-9, step):
+                p1 = np.array([c, y_range[0]])
+                p2 = np.array([c, y_range[1]])
+                q1 = ax.c2p(*(M @ p1))
+                q2 = ax.c2p(*(M @ p2))
+                lines.add(Line(q1, q2, stroke_opacity=0.45, stroke_width=1))
+
+            # horizontal lines: y = c
+            for c in np.arange(y_range[0], y_range[1] + 1e-9, step):
+                p1 = np.array([x_range[0], c])
+                p2 = np.array([x_range[1], c])
+                q1 = ax.c2p(*(M @ p1))
+                q2 = ax.c2p(*(M @ p2))
+                lines.add(Line(q1, q2, stroke_opacity=0.45, stroke_width=1))
+
+            return lines
 
         def make_arrow(vec, color, transform=None):
             v = transform @ vec if transform is not None else vec
             return Arrow(ax.c2p(0, 0), ax.c2p(*v), buff=0,
                             color=color, stroke_width=3, max_tip_length_to_length_ratio=0.15)
 
+        I_mat = np.eye(2)
         disk  = make_disk()
+        grid = make_grid(ax, I_mat)
         arr_e1 = make_arrow(np.array([1,0]), RED)
         arr_e2 = make_arrow(np.array([0,1]), BLUE)
 
         Z_name = MathTex("I_{2}", font_size=30).next_to(ax, UP, buff=0.08)
-        self.play(FadeIn(disk), GrowArrow(arr_e1), GrowArrow(arr_e2), Write(Z_name))
+        self.play(FadeIn(disk), FadeIn(grid), GrowArrow(arr_e1), GrowArrow(arr_e2), Write(Z_name))
         self.wait(0.5)
 
         # -- Corner panel: current matrix value --
@@ -317,7 +360,6 @@ class S04_SVD_Transform(Scene):
 
         eq_symbol = MathTex("=", font_size=28, color=PINK)
         # -- Step 0: show Z = I --
-        I_mat = np.eye(2)
         crn = corner_label("I", I_mat)
         self.play(FadeIn(crn))
         self.wait(0.1)
@@ -335,9 +377,11 @@ class S04_SVD_Transform(Scene):
 
         # Transform disk
         disk2   = make_disk(Vt_mat)
+        grid2 = make_grid(ax, Vt_mat)
         arr1_e1 = make_arrow(np.array([1,0]), RED,  Vt_mat)
         arr1_e2 = make_arrow(np.array([0,1]), BLUE, Vt_mat)
         self.play(Transform(disk, disk2),
+                  Transform(grid, grid2),
                   Transform(arr_e1, arr1_e1),
                   Transform(arr_e2, arr1_e2), run_time=1.8)
 
@@ -360,15 +404,19 @@ class S04_SVD_Transform(Scene):
         grp_mat = VGroup(small_matrix(Sigma_mat, color=GREEN), small_matrix(Vt_mat, color=GREEN))\
                             .arrange(RIGHT, buff=0.1)\
                             .next_to(res_tex, DOWN, buff=0.2)
-        res_mat = VGroup(eq_symbol, small_matrix(T2, color=GREEN))\
+        res_mat = VGroup(eq_symbol, small_matrix(T2, color=PURE_CYAN))\
                             .arrange(RIGHT, buff=0.1)\
                             .next_to(grp_mat, DOWN, buff=0.2)
-        self.play(Write(res_tex), FadeIn(grp_mat), FadeIn(res_mat))
+        self.play(Write(res_tex), FadeIn(grp_mat))
+        self.wait(0.2)
+        self.play(FadeIn(res_mat))
 
         disk3   = make_disk(T2)
+        grid3   = make_grid(ax, T2)
         arr2_e1 = make_arrow(np.array([1,0]), RED,  T2)
         arr2_e2 = make_arrow(np.array([0,1]), BLUE, T2)
         self.play(Transform(disk, disk3),
+                  Transform(grid, grid3),
                   Transform(arr_e1, arr2_e1),
                   Transform(arr_e2, arr2_e2), run_time=1.8)
         self.wait(0.7)
@@ -386,7 +434,7 @@ class S04_SVD_Transform(Scene):
         new_grp_mat = VGroup(small_matrix(U_mat, color=BLUE), small_matrix(Sigma_mat, color=BLUE), small_matrix(Vt_mat, color=BLUE))\
                           .arrange(RIGHT, buff=0.1)\
                           .next_to(res_tex, DOWN, buff=0.2)
-        new_res_mat = VGroup(eq_symbol, small_matrix(T3, color=GREEN))\
+        new_res_mat = VGroup(eq_symbol, small_matrix(T3, color=PURE_CYAN))\
                             .arrange(RIGHT, buff=0.1)\
                             .next_to(grp_mat, DOWN, buff=0.2)
         self.play(
@@ -396,22 +444,15 @@ class S04_SVD_Transform(Scene):
         )
 
         disk4   = make_disk(T3)
+        grid4   = make_grid(ax, T3)
         arr3_e1 = make_arrow(np.array([1,0]), RED,  T3)
         arr3_e2 = make_arrow(np.array([0,1]), BLUE, T3)
         self.play(Transform(disk, disk4),
+                  Transform(grid, grid4),
                   Transform(arr_e1, arr3_e1),
                   Transform(arr_e2, arr3_e2), run_time=1.8)
         self.wait(1.5)
 
-
-#        crn_A = corner_label("A = U\\Sigma V^T =", T3, YELLOW)
-#        self.play(Transform(crn, crn_A))
-#        self.wait(1.5)
-
-#        final = MathTex(r"A = U\Sigma V^T", font_size=38, color=YELLOW)\
-#                    .next_to(heading, DOWN, buff=0.1)
-#        self.play(Transform(step1_title, final))
-#        self.wait(2)
         self.play(*[FadeOut(m) for m in self.mobjects])
 
 
@@ -489,8 +530,8 @@ class S06_Eigen(Scene):
         ).next_to(mat_num, DOWN, buff=1)
 
         # Ve duong cheo
-        line_main = Line(mat_num.get_corner(UL), mat_num.get_corner(DR), color=RED).scale(0.7)
-        line_sub  = Line(mat_num.get_corner(UR), mat_num.get_corner(DL), color=GREEN).scale(0.7)
+        line_main = Line(mat_num.get_corner(UL), mat_num.get_corner(DR), color=GREEN).scale(0.7)
+        line_sub  = Line(mat_num.get_corner(UR), mat_num.get_corner(DL), color=RED).scale(0.7)
         
         self.play(Create(line_main))
         self.play(Create(line_sub))
