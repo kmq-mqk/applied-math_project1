@@ -1,5 +1,5 @@
-import utils
-from part1_skeleton import Matrix
+from part1 import utils
+from part1.part1_skeleton import Matrix
 
 def gauss_jordan_eliminate(A) -> Matrix:
 	"""

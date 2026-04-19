@@ -1,6 +1,6 @@
 # from utils import utils
-import utils
-from part1_skeleton import Matrix, Vector
+import part1.utils
+from part1.part1_skeleton import Matrix, Vector
 
 def rank_and_basis(mat) -> tuple[int, tuple[list[Vector], list[Vector], list[Vector]]]:
 	# return (rank, ([basis of C(self)], [basis of R(self)], [basis of N(self)]))

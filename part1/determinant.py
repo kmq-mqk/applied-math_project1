@@ -1,4 +1,4 @@
-from gauss import gaussian_eliminate # type: ignore
+from part1.gauss import gaussian_eliminate
 
 def determinant(A):
 	# check 

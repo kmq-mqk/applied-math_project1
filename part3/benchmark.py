@@ -16,6 +16,9 @@ from part2.decomposition import svd
 from part2.diagonalization import diagonalize
 from part3.part3_skeleton import Iterative_Solver
 from part1.part1_skeleton import Matrix
+from part1.determinant import determinant 
+
+
 
 # --- CẤU HÌNH HỆ THỐNG ---
 METHODS = ["Gauss", "SVD", "Gauss-Seidel"]

@@ -14,8 +14,8 @@ from part1.part1_skeleton import Matrix
 # --- ĐỊNH NGHĨA CÁC HÀM ---
 # dùng numpy tìm trị riêng 
 def find_eigenvalues(self):
-    if self.num_row != self.num_col:
-        raise ValueError("Chỉ ma trận vuông mới có giá trị riêng.")
+    # if self.num_row != self.num_col:
+    #     raise ValueError("Chỉ ma trận vuông mới có giá trị riêng.")
     
     A_np = np.array(self.data, dtype=float)
     eigenvalues = np.linalg.eigvals(A_np)
@@ -37,8 +37,8 @@ def find_eigenvalues(self):
 Matrix.find_eigenvalues = find_eigenvalues
     
 def diagonalize(self):
-    if self.num_row != self.num_col:
-        raise ValueError("Ma trận phải là ma trận vuông để chéo hóa.")
+    # if self.num_row != self.num_col:
+    #     #raise ValueError("Ma trận phải là ma trận vuông để chéo hóa.")
         
     eigenvalues = self.find_eigenvalues() 
     
@@ -64,8 +64,8 @@ def diagonalize(self):
             eigenvectors_matrix.append(v)
             diagonal_elements.append(lam)
 
-    if len(eigenvectors_matrix) < self.num_row:
-        raise ValueError("Ma trận bị khiếm khuyết, không đủ vector riêng độc lập để chéo hóa.")
+    # if len(eigenvectors_matrix) < self.num_row:
+    #    # raise ValueError("Ma trận bị khiếm khuyết, không đủ vector riêng độc lập để chéo hóa.")
 
     P_data = [[eigenvectors_matrix[j].data[i] for j in range(self.num_col)] for i in range(self.num_row)]
     P = Matrix(P_data)
@@ -84,25 +84,25 @@ if __name__ == "__main__":
          [0, 3, 0],
          [0, 0, 3]]
          
-    try:
-        P, D = Matrix(A).diagonalize()
-        print("Ma trận P:")
-        print(P) 
-        print("\nMa trận D:")
-        print(D)  
+   # try:
+    P, D = Matrix(A).diagonalize()
+    print("Ma trận P:")
+    print(P) 
+    print("\nMa trận D:")
+    print(D)  
 
-        A_test = np.array(A)
-        P_test = np.array(P.data)
-        D_test = np.array(D.data)
-        
-        AP = A_test.dot(P_test)
-        PD = P_test.dot(D_test)
+    A_test = np.array(A)
+    P_test = np.array(P.data)
+    D_test = np.array(D.data)
+    
+    AP = A_test.dot(P_test)
+    PD = P_test.dot(D_test)
 
-        print("\n--- Kiểm tra kết quả ---")
-        if np.allclose(AP, PD):
-            print("Kết quả chính xác! Thỏa mãn A * P = P * D")     
-        else:
-            print("Kết quả chưa chính xác, A * P khác P * D")
+    print("\n--- Kiểm tra kết quả ---")
+    if np.allclose(AP, PD):
+        print("Kết quả chính xác! Thỏa mãn A * P = P * D")     
+    else:
+        print("Kết quả chưa chính xác, A * P khác P * D")
             
-    except Exception as e:
-        print(f"Có lỗi xảy ra: {e}")
+    # except Exception as e:
+    #     print(f"Có lỗi xảy ra: {e}")
