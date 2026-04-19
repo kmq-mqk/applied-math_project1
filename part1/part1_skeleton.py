@@ -1,7 +1,7 @@
 from operator import index
 
-from . import determinant
-from . import gauss
+from part1 import determinant
+from part1 import gauss
 
 class Matrix:
 	""" START CONSTRUCTORS """
