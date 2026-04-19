@@ -99,18 +99,50 @@ Matrix.svd = svd
 
     # Kiểm chứng
 if __name__ == "__main__":
-    A = Matrix([
-        [1, 5, -2, 4],
-        [-3, 2, 7, 1],
-        [8, -1, 3, -5]
-    ])
-    
-    u, sigma, v_t = A.svd()
-    print("Kích thước U:", len(u.data), "x", len(u.data[0]))
-    print("Kích thước Sigma:", len(sigma.data), "x", len(sigma.data[0]))
-    print("Kích thước V_T:", len(v_t.data), "x", len(v_t.data[0]))
-    
-    A_reconstructed = np.matmul(u.data, np.matmul(sigma.data, v_t.data))
-    print(A_reconstructed)
-    if np.allclose(A_reconstructed, A.data):
-        print("SVD decomposition is correct!")
+    # 5 Test Cases cho SVD
+    test_cases_svd = [
+        [[1, 5, -2, 4], [-3, 2, 7, 1], [8, -1, 3, -5]], # Case 1: Chữ nhật ngang (m < n)
+        [[1, 2], [3, 4], [5, 6]],                       # Case 2: Chữ nhật đứng (m > n)
+        [[1, 1], [0, 1]],                               # Case 3: Ma trận vuông
+        [[1, 0, 1], [0, 1, 0], [1, 0, 1]],             # Case 4: Hạng thiếu (Rank-deficient)
+        [[1, 0], [0, 1]]                                # Case 5: Ma trận đơn vị (Edge case)
+    ]
+
+    for idx, A_data in enumerate(test_cases_svd):
+        print(f"\n{'='*25} SVD TEST CASE {idx+1} {'='*25}")
+        try:
+            A_obj = Matrix(A_data)
+            u, sigma, v_t = A_obj.svd()
+            
+            # Chuyển sang numpy để kiểm tra
+            U_np = np.array(u.data, dtype=float)
+            S_np = np.array(sigma.data, dtype=float)
+            VT_np = np.array(v_t.data, dtype=float)
+            A_np = np.array(A_data, dtype=float)
+            
+            # Tái tạo ma trận: A_new = U * Sigma * V^T
+            A_reconstructed = np.matmul(U_np, np.matmul(S_np, VT_np))
+            
+            print(f"Ma trận gốc {len(A_data)}x{len(A_data[0])}:\n{A_np}")
+            print(f"Ma trận Sigma (làm tròn):\n{np.round(S_np, 4)}")
+            
+            # Kiểm tra A == U * Sigma * V^T
+            is_correct = np.allclose(A_np, A_reconstructed, atol=1e-7)
+            
+            # Kiểm tra tính trực giao của U (U^T * U = I)
+            # Vì U là m x m, ta kiểm tra U.T @ U có ra ma trận đơn vị không
+            I_check = np.matmul(U_np.T, U_np)
+            is_u_orthogonal = np.allclose(I_check, np.eye(U_np.shape[1]), atol=1e-7)
+            
+            if is_correct:
+                print(">>> Kết quả: TÁI TẠO CHÍNH XÁC!")
+                if is_u_orthogonal:
+                    print(">>> Tính chất: Ma trận U trực giao hoàn hảo.")
+                else:
+                    # Nếu báo dòng này, nghĩa là bước Gram-Schmidt bổ sung cột đang có vấn đề
+                    print(">>> Lưu ý: Tái tạo đúng nhưng U chưa chuẩn trực giao.")
+            else:
+                print(">>> Kết quả: THẤT BẠI (Sai số quá lớn)!")
+                
+        except Exception as e:
+            print(f"Có lỗi xảy ra tại Test Case {idx+1}: {e}")

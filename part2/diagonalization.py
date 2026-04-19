@@ -80,29 +80,43 @@ Matrix.diagonalize = diagonalize
 
 # --- KIỂM TRA CHƯƠNG TRÌNH ---
 if __name__ == "__main__":
-    A = [[2, 0, -2], 
-         [0, 3, 0],
-         [0, 0, 3]]
-         
-   # try:
-    P, D = Matrix(A).diagonalize()
-    print("Ma trận P:")
-    print(P) 
-    print("\nMa trận D:")
-    print(D)  
-
-    A_test = np.array(A)
-    P_test = np.array(P.data)
-    D_test = np.array(D.data)
+    # Danh sách các ma trận kiểm thử
+    # Case 1: Ma trận cơ bản (3x3)
+    # Case 2: Ma trận đơn vị (Trường hợp biên: P và D là chính nó)
+    # Case 3: Ma trận có trị riêng lặp lại (Kiểm tra nghiệm bội)
+    # Case 4: Ma trận tam giác (Trị riêng nằm trên đường chéo)
+    # Case 5: Ma trận số thực (Kiểm tra độ chính xác số thập phân)
     
-    AP = A_test.dot(P_test)
-    PD = P_test.dot(D_test)
+    test_matrices = [
+        [[2, 0, -2], [0, 3, 0], [0, 0, 3]],         # Case 1
+        [[1, 0, 0], [0, 1, 0], [0, 0, 1]],          # Case 2
+        [[4, 2, 2], [2, 4, 2], [2, 2, 4]],          # Case 3
+        [[1, 2, 3], [0, 4, 5], [0, 0, 6]],          # Case 4
+        [[1.5, 0.5], [0.5, 1.5]]                    # Case 5
+    ]
 
-    print("\n--- Kiểm tra kết quả ---")
-    if np.allclose(AP, PD):
-        print("Kết quả chính xác! Thỏa mãn A * P = P * D")     
-    else:
-        print("Kết quả chưa chính xác, A * P khác P * D")
+    for idx, A_data in enumerate(test_matrices):
+        print(f"\n{'='*20} TEST CASE {idx+1} {'='*20}")
+        try:
+            A_obj = Matrix(A_data)
+            P, D = A_obj.diagonalize()
             
-    # except Exception as e:
-    #     print(f"Có lỗi xảy ra: {e}")
+            print(f"Ma trận đầu vào A:\n{np.array(A_data)}")
+            print(f"Ma trận P (Vecto riêng):\n{P}")
+            print(f"Ma trận D (Trị riêng):\n{D}")
+
+            # Kiểm tra logic: A * P = P * D
+            A_np = np.array(A_data, dtype=float)
+            P_np = np.array(P.data, dtype=float)
+            D_np = np.array(D.data, dtype=float)
+            
+            AP = A_np.dot(P_np)
+            PD = P_np.dot(D_np)
+
+            if np.allclose(AP, PD, atol=1e-5):
+                print(">>> Kết quả: CHÍNH XÁC! (A*P = P*D)")
+            else:
+                print(">>> Kết quả: SAI LỆCH!")
+                
+        except Exception as e:
+            print(f"Có lỗi xảy ra tại Test Case {idx+1}: {e}")
