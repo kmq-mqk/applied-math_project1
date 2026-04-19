@@ -1,5 +1,14 @@
 from operator import index
 
+import sys
+import os
+
+# Fix lỗi ModuleNotFoundError: Thêm thư mục gốc vào path
+current_dir = os.getcwd()
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+
 from part1 import determinant
 from part1 import gauss
 
