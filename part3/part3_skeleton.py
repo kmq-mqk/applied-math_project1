@@ -119,3 +119,46 @@ class Iterative_Solver:
 				return x, k + 1
 
 		return x, max_iterations
+	
+
+# Test cases
+if __name__ == "__main__":
+	def allclose(x, expected, tol=1e-4):
+		return all(abs(x[i] - expected[i]) < tol for i in range(len(x)))
+ 
+	def run_test(name, passed):
+		print(f"  [{'PASS' if passed else 'FAIL'}] {name}")
+ 
+	print("=" * 45)
+	print("TEST — Iterative_Solver.gauss_seidel()")
+	print("=" * 45)
+ 
+	# Test 1 — Hệ 3x3 chéo trội, nghiệm đúng = [1, 2, 3]
+	a = Matrix([[10.0, -1.0, 2.0], [-1.0, 11.0, -1.0], [2.0, -1.0, 10.0]])
+	b = [14.0, 18.0, 30.0]
+	x, _ = Iterative_Solver(a, b).gauss_seidel(eps=1e-10)
+	run_test("3x3 cơ bản — nghiệm [1, 2, 3]", allclose(x, [1.0, 2.0, 3.0]))
+ 
+	# Test 2 — Edge case: hệ 1x1
+	x, _ = Iterative_Solver(Matrix([[5.0]]), [10.0]).gauss_seidel()
+	run_test("1x1 — nghiệm [2.0]", allclose(x, [2.0]))
+ 
+	# Test 3 — Đường chéo rất lớn, hội tụ <= 5 vòng
+	a = Matrix([[1000.0, 1.0, 1.0], [1.0, 1000.0, 1.0], [1.0, 1.0, 1000.0]])
+	x_true = [1.0, -1.0, 2.0]
+	b = [sum(a[i][j]*x_true[j] for j in range(3)) for i in range(3)]
+	x, n_iter = Iterative_Solver(a, b).gauss_seidel(eps=1e-10)
+	run_test("Duong cheo rat lon — hoi tu nhanh", allclose(x, x_true) and n_iter <= 5)
+ 
+	# Test 4 — Edge case: b = [0, 0, 0], nghiem = [0, 0, 0]
+	a = Matrix([[4.0, -1.0, 0.0], [-1.0, 4.0, -1.0], [0.0, -1.0, 4.0]])
+	x, _ = Iterative_Solver(a, [0.0, 0.0, 0.0]).gauss_seidel(eps=1e-10)
+	run_test("b = [0,0,0] — nghiem [0, 0, 0]", allclose(x, [0.0, 0.0, 0.0]))
+ 
+	# Test 5 — Edge case: ma tran KHONG cheo troi → is_dd = False, khong crash
+	a = Matrix([[1.0, 2.0, 3.0], [4.0, 1.0, 6.0], [7.0, 8.0, 1.0]])
+	solver = Iterative_Solver(a, [1.0, 1.0, 1.0])
+	run_test("Khong cheo troi — is_dd = False", not solver.is_strictly_diagonally_dominant())
+ 
+	print("=" * 45)
+ 
